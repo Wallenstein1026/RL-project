@@ -1,0 +1,22 @@
+{
+  "vs_random": {
+    "win_vs_random": 0.989,
+    "draw_vs_random": 0.011,
+    "loss_vs_random": 0.0,
+    "win_vs_minimax": 0.0,
+    "draw_vs_minimax": 1.0,
+    "loss_vs_minimax": 0.0,
+    "policy_optimality": 0.25249169435215946,
+    "q_table_size": 8620
+  },
+  "selfplay": {
+    "win_vs_random": 0.972,
+    "draw_vs_random": 0.028,
+    "loss_vs_random": 0.0,
+    "win_vs_minimax": 0.0,
+    "draw_vs_minimax": 1.0,
+    "loss_vs_minimax": 0.0,
+    "policy_optimality": 0.3211920529801324,
+    "q_table_size": 8610
+  }
+}

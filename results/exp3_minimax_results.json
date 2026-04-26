@@ -1,0 +1,20 @@
+{
+  "vs_Random + fixed_\u03b5": {
+    "win": 0.0,
+    "draw": 0.0,
+    "loss": 1.0,
+    "policy_optimality": 0.26292134831460673
+  },
+  "vs_Random + linear_\u03b5": {
+    "win": 0.0,
+    "draw": 1.0,
+    "loss": 0.0,
+    "policy_optimality": 0.18801652892561985
+  },
+  "vs_Random + exp_\u03b5": {
+    "win": 0.0,
+    "draw": 1.0,
+    "loss": 0.0,
+    "policy_optimality": 0.7202505219206681
+  }
+}

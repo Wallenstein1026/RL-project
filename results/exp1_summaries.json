@@ -1,0 +1,32 @@
+{
+  "\u03b5-fixed (vs Random)": {
+    "win_vs_random": 0.979,
+    "draw_vs_random": 0.021,
+    "loss_vs_random": 0.0,
+    "win_vs_minimax": 0.0,
+    "draw_vs_minimax": 1.0,
+    "loss_vs_minimax": 0.0,
+    "policy_optimality": 0.30944625407166126,
+    "q_table_size": 8631
+  },
+  "\u03b5-linear (vs Random)": {
+    "win_vs_random": 0.996,
+    "draw_vs_random": 0.004,
+    "loss_vs_random": 0.0,
+    "win_vs_minimax": 0.0,
+    "draw_vs_minimax": 1.0,
+    "loss_vs_minimax": 0.0,
+    "policy_optimality": 0.6430976430976431,
+    "q_table_size": 8616
+  },
+  "\u03b5-exponential (vs Random)": {
+    "win_vs_random": 0.992,
+    "draw_vs_random": 0.008,
+    "loss_vs_random": 0.0,
+    "win_vs_minimax": 0.0,
+    "draw_vs_minimax": 1.0,
+    "loss_vs_minimax": 0.0,
+    "policy_optimality": 0.24054982817869416,
+    "q_table_size": 8312
+  }
+}
