@@ -134,7 +134,7 @@ class QLearningAgent:
         next_state: tuple,
         next_available: List[int],
         done: bool,
-    ) -> None:
+    ) -> float:
         current_q = self.get_q(state, action)
 
         if done or not next_available:
@@ -142,7 +142,9 @@ class QLearningAgent:
         else:
             target = reward + self.gamma * self.get_max_q(next_state, next_available)
 
-        self.q_table[(state, action)] = current_q + self.alpha * (target - current_q)
+        td_error = target - current_q
+        self.q_table[(state, action)] = current_q + self.alpha * td_error
+        return td_error
 
     def update_epsilon(self, episode: int) -> None:
         self.epsilon = self._eps_fn(episode)
@@ -193,25 +195,46 @@ class MinimaxAgent:
 
     def select_action(self, state: tuple, available_actions: List[int],
                       greedy: bool = True) -> int:
-        best_score = -float("inf") if self.player == 1 else float("inf")
+        # score_action returns from current player's perspective, so
+        # both players maximize their own score.
+        best_score = -float("inf")
         best_action = available_actions[0]
 
         for action in available_actions:
-            next_state = list(state)
-            next_state[action] = self.player
-            next_state = tuple(next_state)
-
-            score = self._minimax(next_state, player=3 - self.player,
-                                  is_maximizing=(self.player == 2))
-
-            if self.player == 1:
-                if score > best_score:
-                    best_score, best_action = score, action
-            else:
-                if score < best_score:
-                    best_score, best_action = score, action
+            score = self.score_action(state, action)
+            if score > best_score:
+                best_score, best_action = score, action
 
         return best_action
+
+    def score_action(self, state: tuple, action: int) -> int:
+        """
+        Compute the minimax score for taking *action* from *state*
+        as the current player.
+
+        Returns +1 (win), 0 (draw), -1 (loss) from current player's perspective.
+        """
+        next_state = list(state)
+        next_state[action] = self.player
+        next_state = tuple(next_state)
+        score = self._minimax(next_state, player=3 - self.player,
+                              is_maximizing=(self.player == 2))
+        # Convert score back to current-player perspective:
+        # _minimax returns +1 for X(1) win, -1 for O(2) win, 0 draw.
+        # If we are player 1, score is already from our perspective.
+        # If we are player 2, we need to invert.
+        if self.player == 2:
+            score = -score
+        return score
+
+    def best_score(self, state: tuple, available_actions: List[int]) -> int:
+        """
+        Return the best possible minimax score achievable from *state*
+        for the current player, among the given available actions.
+        Since score_action returns from current player's perspective,
+        both players maximize their own score.
+        """
+        return max(self.score_action(state, a) for a in available_actions)
 
     def _minimax(self, state: tuple, player: int,
                  is_maximizing: bool) -> int:
