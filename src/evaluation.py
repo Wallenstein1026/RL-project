@@ -103,6 +103,7 @@ def compute_policy_optimality(
 ) -> float:
     env = TicTacToeEnv()
     minimax = MinimaxAgent(player=agent_player)
+    minimax_eval = MinimaxAgent(player=agent_player)  # separate cache
 
     agree = 0
     total = 0
@@ -111,6 +112,7 @@ def compute_policy_optimality(
         state = env.reset()
         done = False
 
+        # Random walk to reach a diverse board state
         num_random_moves = np.random.randint(0, 5)
         for _ in range(num_random_moves):
             if done:
@@ -132,9 +134,15 @@ def compute_policy_optimality(
             continue
 
         agent_action = agent.select_action(state, available, greedy=True)
-        minimax_action = minimax.select_action(state, available)
 
-        if agent_action == minimax_action:
+        # Use score-based comparison: agent is "optimal" if its chosen
+        # action has the same minimax score as the best possible action.
+        # This correctly handles cases where multiple symmetric moves are
+        # equally optimal.
+        agent_action_score = minimax.score_action(state, agent_action)
+        best_possible_score = minimax.best_score(state, available)
+
+        if agent_action_score == best_possible_score:
             agree += 1
         total += 1
 
@@ -161,6 +169,7 @@ def plot_training_curves(
         ("Average Reward",        "avg_reward",               "Avg Reward"),
         ("Epsilon (ε) Decay",     "epsilon",                  "ε"),
         ("Exploration Fraction",  "random_action_fraction",   "Fraction Random"),
+        ("TD Error (|δ|)",        "td_error",                  "|TD Error|"),
     ]
 
     colors = plt.cm.tab10(np.linspace(0, 1, len(histories)))  # type: ignore
@@ -180,13 +189,6 @@ def plot_training_curves(
         ax.legend(fontsize=8, loc="best")
         ax.grid(True, alpha=0.3)
         ax.tick_params(labelsize=8)
-
-    ax6 = fig.add_subplot(gs[1, 2])
-    ax6.axis("off")
-    ax6.set_title("Legend / Notes", fontsize=11, fontweight="bold")
-    notes = "\n".join(f"  {label}" for label in histories)
-    ax6.text(0.05, 0.9, notes, transform=ax6.transAxes,
-             fontsize=9, va="top", family="monospace")
 
     fig.suptitle("Q-Learning Training Curves – Tic-Tac-Toe",
                  fontsize=14, fontweight="bold", y=1.01)
@@ -234,6 +236,7 @@ def print_final_summary(
     agent: QLearningAgent,
     eval_episodes: int = 1_000,
     optimality_states: int = 500,
+    verbose: bool = True,
 ) -> Dict:
     w_r, d_r, l_r = evaluate_vs_random(agent, episodes=eval_episodes)
     w_m, d_m, l_m = evaluate_vs_minimax(agent, episodes=min(eval_episodes, 300))
@@ -242,14 +245,15 @@ def print_final_summary(
     n = eval_episodes
     nm = min(eval_episodes, 300)
 
-    print(f"\n{'='*60}")
-    print(f"  {label}")
-    print(f"{'='*60}")
-    print(f"  vs Random   : W={w_r/n:.2%}  D={d_r/n:.2%}  L={l_r/n:.2%}")
-    print(f"  vs Minimax  : W={w_m/nm:.2%}  D={d_m/nm:.2%}  L={l_m/nm:.2%}")
-    print(f"  Policy Opt. : {opt:.2%}  (agreement with Minimax)")
-    print(f"  Q-table size: {len(agent.q_table)} entries")
-    print(f"{'='*60}\n")
+    if verbose:
+        print(f"\n{'='*60}")
+        print(f"  {label}")
+        print(f"{'='*60}")
+        print(f"  vs Random   : W={w_r/n:.2%}  D={d_r/n:.2%}  L={l_r/n:.2%}")
+        print(f"  vs Minimax  : W={w_m/nm:.2%}  D={d_m/nm:.2%}  L={l_m/nm:.2%}")
+        print(f"  Policy Opt. : {opt:.2%}  (agreement with Minimax)")
+        print(f"  Q-table size: {len(agent.q_table)} entries")
+        print(f"{'='*60}\n")
 
     return {
         "win_vs_random": w_r / n,

@@ -24,9 +24,10 @@ def _run_episode_vs_random(
     env: TicTacToeEnv,
     agent: QLearningAgent,
     opponent: RandomAgent,
-) -> float:
+) -> Tuple[float, float]:
     state = env.reset()
     total_reward = 0.0
+    td_errors: List[float] = []
 
     while True:
         available = env.get_available_actions(state)
@@ -34,7 +35,8 @@ def _run_episode_vs_random(
 
         next_state, reward, done, _ = env.step(action)
         if done:
-            agent.update(state, action, reward, next_state, [], True)
+            td = agent.update(state, action, reward, next_state, [], True)
+            td_errors.append(abs(td))
             total_reward += reward
             break
 
@@ -43,26 +45,31 @@ def _run_episode_vs_random(
 
         next_next_state, opp_reward, done, _ = env.step(opp_action)
         if done:
-            agent.update(state, action, opp_reward, next_next_state, [], True)
+            td = agent.update(state, action, opp_reward, next_next_state, [], True)
+            td_errors.append(abs(td))
             total_reward += opp_reward
             break
 
         next_available = env.get_available_actions(next_next_state)
-        agent.update(state, action, 0.0, next_next_state,
-                     next_available, False)
+        td = agent.update(state, action, 0.0, next_next_state,
+                          next_available, False)
+        td_errors.append(abs(td))
 
         state = next_next_state
 
-    return total_reward
+    avg_td = float(np.mean(td_errors)) if td_errors else 0.0
+    return total_reward, avg_td
 
 
 def _run_episode_selfplay(
     env: TicTacToeEnv,
     agent1: QLearningAgent,
     agent2: QLearningAgent,
-) -> Tuple[float, float]:
+) -> Tuple[float, float, float, float]:
     state = env.reset()
     r1 = r2 = 0.0
+    td1: List[float] = []
+    td2: List[float] = []
 
     last_exp: Dict[int, Optional[Tuple[tuple, int]]] = {1: None, 2: None}
 
@@ -87,22 +94,32 @@ def _run_episode_selfplay(
             ls, la = last_exp[other_player]
             other_agent = agent2 if other_player == 2 else agent1
             if done:
-                other_agent.update(ls, la, -agent_reward,
-                                   next_state, [], True)
+                td = other_agent.update(ls, la, -agent_reward,
+                                        next_state, [], True)
             else:
-                other_agent.update(ls, la, 0.0,
-                                   next_state,
-                                   env.get_available_actions(next_state),
-                                   False)
+                td = other_agent.update(ls, la, 0.0,
+                                        next_state,
+                                        env.get_available_actions(next_state),
+                                        False)
+            if other_player == 1:
+                td1.append(abs(td))
+            else:
+                td2.append(abs(td))
 
         if done:
-            agent.update(state, action, agent_reward, next_state, [], True)
+            td = agent.update(state, action, agent_reward, next_state, [], True)
+            if current_player == 1:
+                td1.append(abs(td))
+            else:
+                td2.append(abs(td))
             break
 
         last_exp[current_player] = (state, action)
         state = next_state
 
-    return r1, r2
+    avg_td1 = float(np.mean(td1)) if td1 else 0.0
+    avg_td2 = float(np.mean(td2)) if td2 else 0.0
+    return r1, r2, avg_td1, avg_td2
 
 
 # =========================================================================== #
@@ -115,7 +132,11 @@ def train_vs_random(
     eval_interval: int = 1_000,
     eval_episodes: int = 500,
     verbose: bool = True,
+    seed: Optional[int] = None,
 ) -> Dict:
+    if seed is not None:
+        np.random.seed(seed)
+
     env = TicTacToeEnv()
     opponent = RandomAgent(player=2)
 
@@ -126,19 +147,23 @@ def train_vs_random(
         "win_rate_vs_random": [],
         "draw_rate_vs_random": [],
         "random_action_fraction": [],
+        "td_error": [],
     }
 
     reward_buffer: List[float] = []
+    td_buffer: List[float] = []
 
     for ep in range(total_episodes):
         agent.update_epsilon(ep)
-        reward = _run_episode_vs_random(env, agent, opponent)
+        reward, avg_td = _run_episode_vs_random(env, agent, opponent)
         reward_buffer.append(reward)
+        td_buffer.append(avg_td)
 
         if (ep + 1) % eval_interval == 0:
             from .evaluation import evaluate_vs_random
             wins, draws, _ = evaluate_vs_random(agent, episodes=eval_episodes)
             avg_r = float(np.mean(reward_buffer[-eval_interval:]))
+            avg_td_window = float(np.mean(td_buffer[-eval_interval:]))
 
             total_actions = agent.random_action_count + agent.greedy_action_count
             rand_frac = (agent.random_action_count / total_actions
@@ -150,6 +175,7 @@ def train_vs_random(
             history["win_rate_vs_random"].append(wins / eval_episodes)
             history["draw_rate_vs_random"].append(draws / eval_episodes)
             history["random_action_fraction"].append(rand_frac)
+            history["td_error"].append(avg_td_window)
 
             if verbose:
                 print(
@@ -172,7 +198,11 @@ def train_selfplay(
     eval_interval: int = 1_000,
     eval_episodes: int = 500,
     verbose: bool = True,
+    seed: Optional[int] = None,
 ) -> Dict:
+    if seed is not None:
+        np.random.seed(seed)
+
     env = TicTacToeEnv()
 
     history = {
@@ -182,21 +212,25 @@ def train_selfplay(
         "win_rate_vs_random": [],
         "draw_rate_vs_random": [],
         "random_action_fraction": [],
+        "td_error": [],
     }
 
     reward_buffer: List[float] = []
+    td_buffer: List[float] = []
 
     for ep in range(total_episodes):
         agent1.update_epsilon(ep)
         agent2.update_epsilon(ep)
 
-        r1, _ = _run_episode_selfplay(env, agent1, agent2)
+        r1, _, td1, _ = _run_episode_selfplay(env, agent1, agent2)
         reward_buffer.append(r1)
+        td_buffer.append(td1)
 
         if (ep + 1) % eval_interval == 0:
             from .evaluation import evaluate_vs_random
             wins, draws, _ = evaluate_vs_random(agent1, episodes=eval_episodes)
             avg_r = float(np.mean(reward_buffer[-eval_interval:]))
+            avg_td_window = float(np.mean(td_buffer[-eval_interval:]))
 
             total_actions = agent1.random_action_count + agent1.greedy_action_count
             rand_frac = (agent1.random_action_count / total_actions
@@ -208,6 +242,7 @@ def train_selfplay(
             history["win_rate_vs_random"].append(wins / eval_episodes)
             history["draw_rate_vs_random"].append(draws / eval_episodes)
             history["random_action_fraction"].append(rand_frac)
+            history["td_error"].append(avg_td_window)
 
             if verbose:
                 print(
