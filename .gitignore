@@ -5,9 +5,4 @@ __pycache__/
 # macOS
 .DS_Store
 
-# Backup / temporary results
-results_backup_*/
-results_run*.log
-results_run*/
-results_run*/
-results_seed42_check/
+

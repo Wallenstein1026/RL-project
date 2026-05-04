@@ -1,0 +1,446 @@
+{
+  "vs_Random + fixed_eps_0.1": {
+    "board_size": 4,
+    "win_length": 4,
+    "total_episodes": 500000,
+    "eval_interval": 2000,
+    "fixed_epsilon_grid": [
+      0.1,
+      0.2,
+      0.3,
+      0.5
+    ],
+    "fixed_epsilon": 0.1,
+    "hyperparameters": {
+      "alpha": 0.1,
+      "gamma": 0.9,
+      "epsilon_start": 0.1,
+      "epsilon_end": 0.1,
+      "schedule": "fixed"
+    },
+    "num_runs": 3,
+    "seeds": [
+      242,
+      243,
+      244
+    ],
+    "best_run": {
+      "run_index": 2,
+      "seed": 244,
+      "selection_score": [
+        0.9833333333333333,
+        0.06544502617801047,
+        0.0,
+        -0.016666666666666666
+      ],
+      "metrics": {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.9833333333333333,
+        "loss_vs_minimax": 0.016666666666666666,
+        "policy_optimality": 0.06544502617801047
+      }
+    },
+    "mean": {
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.3311111111111111,
+      "loss_vs_minimax": 0.668888888888889,
+      "policy_optimality": 0.16796885487984967
+    },
+    "std": {
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.46120882498811056,
+      "loss_vs_minimax": 0.4612088249881105,
+      "policy_optimality": 0.15326539638739986
+    },
+    "individual": [
+      {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.01,
+        "loss_vs_minimax": 0.99,
+        "policy_optimality": 0.05384615384615385
+      },
+      {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.0,
+        "loss_vs_minimax": 1.0,
+        "policy_optimality": 0.38461538461538464
+      },
+      {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.9833333333333333,
+        "loss_vs_minimax": 0.016666666666666666,
+        "policy_optimality": 0.06544502617801047
+      }
+    ]
+  },
+  "vs_Random + fixed_eps_0.2": {
+    "board_size": 4,
+    "win_length": 4,
+    "total_episodes": 500000,
+    "eval_interval": 2000,
+    "fixed_epsilon_grid": [
+      0.1,
+      0.2,
+      0.3,
+      0.5
+    ],
+    "fixed_epsilon": 0.2,
+    "hyperparameters": {
+      "alpha": 0.1,
+      "gamma": 0.9,
+      "epsilon_start": 0.2,
+      "epsilon_end": 0.2,
+      "schedule": "fixed"
+    },
+    "num_runs": 3,
+    "seeds": [
+      252,
+      253,
+      254
+    ],
+    "best_run": {
+      "run_index": 1,
+      "seed": 253,
+      "selection_score": [
+        0.77,
+        0.3975609756097561,
+        0.0,
+        -0.23
+      ],
+      "metrics": {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.77,
+        "loss_vs_minimax": 0.23,
+        "policy_optimality": 0.3975609756097561
+      }
+    },
+    "mean": {
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.2733333333333334,
+      "loss_vs_minimax": 0.7266666666666666,
+      "policy_optimality": 0.17873373810464446
+    },
+    "std": {
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.35178907822096406,
+      "loss_vs_minimax": 0.35178907822096406,
+      "policy_optimality": 0.15475551133565352
+    },
+    "individual": [
+      {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.05,
+        "loss_vs_minimax": 0.95,
+        "policy_optimality": 0.07246376811594203
+      },
+      {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.77,
+        "loss_vs_minimax": 0.23,
+        "policy_optimality": 0.3975609756097561
+      },
+      {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.0,
+        "loss_vs_minimax": 1.0,
+        "policy_optimality": 0.0661764705882353
+      }
+    ]
+  },
+  "vs_Random + fixed_eps_0.3": {
+    "board_size": 4,
+    "win_length": 4,
+    "total_episodes": 500000,
+    "eval_interval": 2000,
+    "fixed_epsilon_grid": [
+      0.1,
+      0.2,
+      0.3,
+      0.5
+    ],
+    "fixed_epsilon": 0.3,
+    "hyperparameters": {
+      "alpha": 0.1,
+      "gamma": 0.9,
+      "epsilon_start": 0.3,
+      "epsilon_end": 0.3,
+      "schedule": "fixed"
+    },
+    "num_runs": 3,
+    "seeds": [
+      262,
+      263,
+      264
+    ],
+    "best_run": {
+      "run_index": 2,
+      "seed": 264,
+      "selection_score": [
+        0.18,
+        0.40601503759398494,
+        0.0,
+        -0.82
+      ],
+      "metrics": {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.18,
+        "loss_vs_minimax": 0.82,
+        "policy_optimality": 0.40601503759398494
+      }
+    },
+    "mean": {
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.06888888888888889,
+      "loss_vs_minimax": 0.9311111111111111,
+      "policy_optimality": 0.2649861916250394
+    },
+    "std": {
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.07931808132255443,
+      "loss_vs_minimax": 0.07931808132255447,
+      "policy_optimality": 0.13840651832191733
+    },
+    "individual": [
+      {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.0,
+        "loss_vs_minimax": 1.0,
+        "policy_optimality": 0.31202046035805625
+      },
+      {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.02666666666666667,
+        "loss_vs_minimax": 0.9733333333333334,
+        "policy_optimality": 0.07692307692307693
+      },
+      {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.18,
+        "loss_vs_minimax": 0.82,
+        "policy_optimality": 0.40601503759398494
+      }
+    ]
+  },
+  "vs_Random + fixed_eps_0.5": {
+    "board_size": 4,
+    "win_length": 4,
+    "total_episodes": 500000,
+    "eval_interval": 2000,
+    "fixed_epsilon_grid": [
+      0.1,
+      0.2,
+      0.3,
+      0.5
+    ],
+    "fixed_epsilon": 0.5,
+    "hyperparameters": {
+      "alpha": 0.1,
+      "gamma": 0.9,
+      "epsilon_start": 0.5,
+      "epsilon_end": 0.5,
+      "schedule": "fixed"
+    },
+    "num_runs": 3,
+    "seeds": [
+      272,
+      273,
+      274
+    ],
+    "best_run": {
+      "run_index": 2,
+      "seed": 274,
+      "selection_score": [
+        1.0,
+        0.3690773067331671,
+        0.0,
+        -0.0
+      ],
+      "metrics": {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.3690773067331671
+      }
+    },
+    "mean": {
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.4377777777777778,
+      "loss_vs_minimax": 0.5622222222222222,
+      "policy_optimality": 0.1729945238387248
+    },
+    "std": {
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.40428568312549346,
+      "loss_vs_minimax": 0.40428568312549346,
+      "policy_optimality": 0.13866478223238599
+    },
+    "individual": [
+      {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.06666666666666667,
+        "loss_vs_minimax": 0.9333333333333333,
+        "policy_optimality": 0.07259953161592506
+      },
+      {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.24666666666666667,
+        "loss_vs_minimax": 0.7533333333333333,
+        "policy_optimality": 0.0773067331670823
+      },
+      {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.3690773067331671
+      }
+    ]
+  },
+  "vs_Random + linear_eps": {
+    "board_size": 4,
+    "win_length": 4,
+    "total_episodes": 500000,
+    "eval_interval": 2000,
+    "fixed_epsilon_grid": [
+      0.1,
+      0.2,
+      0.3,
+      0.5
+    ],
+    "fixed_epsilon": 0.3,
+    "hyperparameters": {
+      "alpha": 0.1,
+      "gamma": 0.9,
+      "epsilon_start": 1.0,
+      "epsilon_end": 0.05,
+      "schedule": "linear"
+    },
+    "num_runs": 3,
+    "seeds": [
+      282,
+      283,
+      284
+    ],
+    "best_run": {
+      "run_index": 0,
+      "seed": 282,
+      "selection_score": [
+        0.10666666666666667,
+        0.14540816326530612,
+        0.0,
+        -0.8933333333333333
+      ],
+      "metrics": {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.10666666666666667,
+        "loss_vs_minimax": 0.8933333333333333,
+        "policy_optimality": 0.14540816326530612
+      }
+    },
+    "mean": {
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.05444444444444444,
+      "loss_vs_minimax": 0.9455555555555556,
+      "policy_optimality": 0.1372143010573633
+    },
+    "std": {
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.043574825669172396,
+      "loss_vs_minimax": 0.0435748256691724,
+      "policy_optimality": 0.010065633413563558
+    },
+    "individual": [
+      {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.10666666666666667,
+        "loss_vs_minimax": 0.8933333333333333,
+        "policy_optimality": 0.14540816326530612
+      },
+      {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.056666666666666664,
+        "loss_vs_minimax": 0.9433333333333334,
+        "policy_optimality": 0.1431980906921241
+      },
+      {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.0,
+        "loss_vs_minimax": 1.0,
+        "policy_optimality": 0.12303664921465969
+      }
+    ]
+  },
+  "vs_Random + exp_eps": {
+    "board_size": 4,
+    "win_length": 4,
+    "total_episodes": 500000,
+    "eval_interval": 2000,
+    "fixed_epsilon_grid": [
+      0.1,
+      0.2,
+      0.3,
+      0.5
+    ],
+    "fixed_epsilon": 0.3,
+    "hyperparameters": {
+      "alpha": 0.1,
+      "gamma": 0.9,
+      "epsilon_start": 1.0,
+      "epsilon_end": 0.05,
+      "schedule": "exponential"
+    },
+    "num_runs": 3,
+    "seeds": [
+      292,
+      293,
+      294
+    ],
+    "best_run": {
+      "run_index": 0,
+      "seed": 292,
+      "selection_score": [
+        0.17666666666666667,
+        0.09263657957244656,
+        0.0,
+        -0.8233333333333334
+      ],
+      "metrics": {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.17666666666666667,
+        "loss_vs_minimax": 0.8233333333333334,
+        "policy_optimality": 0.09263657957244656
+      }
+    },
+    "mean": {
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.06999999999999999,
+      "loss_vs_minimax": 0.93,
+      "policy_optimality": 0.09649487730222399
+    },
+    "std": {
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.0766425082710246,
+      "loss_vs_minimax": 0.07664250827102458,
+      "policy_optimality": 0.005389245345073211
+    },
+    "individual": [
+      {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.17666666666666667,
+        "loss_vs_minimax": 0.8233333333333334,
+        "policy_optimality": 0.09263657957244656
+      },
+      {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.0,
+        "loss_vs_minimax": 1.0,
+        "policy_optimality": 0.10411622276029056
+      },
+      {
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.03333333333333333,
+        "loss_vs_minimax": 0.9666666666666667,
+        "policy_optimality": 0.09273182957393483
+      }
+    ]
+  }
+}
