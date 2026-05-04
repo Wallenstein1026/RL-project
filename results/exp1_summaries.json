@@ -1,32 +1,185 @@
 {
-  "\u03b5-fixed (vs Random)": {
-    "win_vs_random": 0.979,
-    "draw_vs_random": 0.021,
-    "loss_vs_random": 0.0,
-    "win_vs_minimax": 0.0,
-    "draw_vs_minimax": 1.0,
-    "loss_vs_minimax": 0.0,
-    "policy_optimality": 0.30944625407166126,
-    "q_table_size": 8631
+  "\u03b5-fixed": {
+    "num_runs": 3,
+    "base_seed": 42,
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "mean": {
+      "win_vs_random": 0.9866666666666667,
+      "draw_vs_random": 0.010333333333333333,
+      "loss_vs_random": 0.0030000000000000005,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 1.0,
+      "loss_vs_minimax": 0.0,
+      "policy_optimality": 0.9152678135024308,
+      "q_table_size": 8631.0
+    },
+    "std": {
+      "win_vs_random": 0.0023570226039551605,
+      "draw_vs_random": 0.0036817870057290866,
+      "loss_vs_random": 0.0021602468994692866,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.0,
+      "loss_vs_minimax": 0.0,
+      "policy_optimality": 0.007686904646106821,
+      "q_table_size": 0.0
+    },
+    "individual": [
+      {
+        "win_vs_random": 0.985,
+        "draw_vs_random": 0.01,
+        "loss_vs_random": 0.005,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.9049180327868852,
+        "q_table_size": 8631
+      },
+      {
+        "win_vs_random": 0.985,
+        "draw_vs_random": 0.015,
+        "loss_vs_random": 0.0,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.9233226837060703,
+        "q_table_size": 8631
+      },
+      {
+        "win_vs_random": 0.99,
+        "draw_vs_random": 0.006,
+        "loss_vs_random": 0.004,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.9175627240143369,
+        "q_table_size": 8631
+      }
+    ]
   },
-  "\u03b5-linear (vs Random)": {
-    "win_vs_random": 0.996,
-    "draw_vs_random": 0.004,
-    "loss_vs_random": 0.0,
-    "win_vs_minimax": 0.0,
-    "draw_vs_minimax": 1.0,
-    "loss_vs_minimax": 0.0,
-    "policy_optimality": 0.6430976430976431,
-    "q_table_size": 8616
+  "\u03b5-linear": {
+    "num_runs": 3,
+    "base_seed": 42,
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "mean": {
+      "win_vs_random": 0.9903333333333334,
+      "draw_vs_random": 0.009666666666666665,
+      "loss_vs_random": 0.0,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 1.0,
+      "loss_vs_minimax": 0.0,
+      "policy_optimality": 0.8922177265742853,
+      "q_table_size": 8618.0
+    },
+    "std": {
+      "win_vs_random": 0.002624669291337273,
+      "draw_vs_random": 0.0026246692913372703,
+      "loss_vs_random": 0.0,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.0,
+      "loss_vs_minimax": 0.0,
+      "policy_optimality": 0.01659281692953933,
+      "q_table_size": 2.8284271247461903
+    },
+    "individual": [
+      {
+        "win_vs_random": 0.989,
+        "draw_vs_random": 0.011,
+        "loss_vs_random": 0.0,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.9150943396226415,
+        "q_table_size": 8622
+      },
+      {
+        "win_vs_random": 0.988,
+        "draw_vs_random": 0.012,
+        "loss_vs_random": 0.0,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.8762541806020067,
+        "q_table_size": 8616
+      },
+      {
+        "win_vs_random": 0.994,
+        "draw_vs_random": 0.006,
+        "loss_vs_random": 0.0,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.8853046594982079,
+        "q_table_size": 8616
+      }
+    ]
   },
-  "\u03b5-exponential (vs Random)": {
-    "win_vs_random": 0.992,
-    "draw_vs_random": 0.008,
-    "loss_vs_random": 0.0,
-    "win_vs_minimax": 0.0,
-    "draw_vs_minimax": 1.0,
-    "loss_vs_minimax": 0.0,
-    "policy_optimality": 0.24054982817869416,
-    "q_table_size": 8312
+  "\u03b5-exponential": {
+    "num_runs": 3,
+    "base_seed": 42,
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "mean": {
+      "win_vs_random": 0.9906666666666667,
+      "draw_vs_random": 0.009333333333333334,
+      "loss_vs_random": 0.0,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 1.0,
+      "loss_vs_minimax": 0.0,
+      "policy_optimality": 0.874342593298907,
+      "q_table_size": 8335.0
+    },
+    "std": {
+      "win_vs_random": 0.0038586123009300786,
+      "draw_vs_random": 0.003858612300930075,
+      "loss_vs_random": 0.0,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.0,
+      "loss_vs_minimax": 0.0,
+      "policy_optimality": 0.01163025963732527,
+      "q_table_size": 8.831760866327848
+    },
+    "individual": [
+      {
+        "win_vs_random": 0.987,
+        "draw_vs_random": 0.013,
+        "loss_vs_random": 0.0,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.8614864864864865,
+        "q_table_size": 8338
+      },
+      {
+        "win_vs_random": 0.996,
+        "draw_vs_random": 0.004,
+        "loss_vs_random": 0.0,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.8896551724137931,
+        "q_table_size": 8323
+      },
+      {
+        "win_vs_random": 0.989,
+        "draw_vs_random": 0.011,
+        "loss_vs_random": 0.0,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.8718861209964412,
+        "q_table_size": 8344
+      }
+    ]
   }
 }

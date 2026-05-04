@@ -63,21 +63,23 @@ DEFAULT_HP = dict(
 #  Statistics helpers                                                           #
 # =========================================================================== #
 
-def _stats_str(values: list) -> str:
-    """Format mean ± std for a list of floats."""
+def _stats_str(values: list, as_percent: bool = True) -> str:
+    """Format mean ± std for a list of numeric values."""
     if len(values) <= 1:
-        return f"{values[0]:.2%}" if values else "N/A"
+        if not values:
+            return "N/A"
+        return f"{values[0]:.2%}" if as_percent else f"{values[0]:.0f}"
     m = np.mean(values)
     s = np.std(values)
-    return f"{m:.2%} ± {s:.2%}"
+    return f"{m:.2%} ± {s:.2%}" if as_percent else f"{m:.0f} ± {s:.0f}"
 
 
 def _print_run_summary(label: str, values: dict):
     """Print a summary table for one config across multiple runs."""
     print(f"\n  {label}")
-    print(f"  {'─' * 60}")
+    print(f"  {'-' * 60}")
     for metric, vals in values.items():
-        print(f"    {metric:30s}: {_stats_str(vals)}")
+        print(f"    {metric:30s}: {_stats_str(vals, as_percent=(metric != 'q_table_size'))}")
 
 
 # =========================================================================== #
@@ -126,6 +128,7 @@ def experiment_1(total_episodes: int, eval_interval: int,
 
             if run == num_runs - 1:
                 all_histories[f"ε-{sched}"] = hist
+                agent.save(f"results/agent_exp1_{sched}.pkl")
 
             label = f"ε-{sched} (vs Random)"
             summary = print_final_summary(label, agent, verbose=False)
@@ -150,9 +153,6 @@ def experiment_1(total_episodes: int, eval_interval: int,
                          filename="exp1_schedules.png")
     plot_policy_optimality_bar(opt_scores, save_dir="results",
                                filename="exp1_optimality.png")
-
-    # Save last-run agent for interactive play
-    # (use the last schedule's agent from the last run — already saved above)
 
     with open("results/exp1_summaries.json", "w") as f:
         json.dump(all_summaries, f, indent=2)
@@ -222,6 +222,10 @@ def experiment_2(total_episodes: int, eval_interval: int,
 
             if run == num_runs - 1:
                 all_histories[paradigm] = hist
+                if mode == "train_vs_random":
+                    agent.save("results/agent_exp2_vs_random.pkl")
+                else:
+                    agent.save("results/agent_exp2_selfplay.pkl")
 
             summary = print_final_summary(
                 f"{label} (run {run+1})", agent, verbose=False
@@ -265,15 +269,15 @@ def experiment_3(total_episodes: int, eval_interval: int,
     print("=" * 70)
 
     configs = [
-        ("vs_Random + fixed_ε",       dict(schedule="fixed")),
-        ("vs_Random + linear_ε",      dict(schedule="linear")),
-        ("vs_Random + exp_ε",         dict(schedule="exponential")),
+        ("vs_Random + fixed_ε",       dict(schedule="fixed"),       "fixed"),
+        ("vs_Random + linear_ε",      dict(schedule="linear"),      "linear"),
+        ("vs_Random + exp_ε",         dict(schedule="exponential"), "exponential"),
     ]
 
     opt_scores: dict = {}
     all_results: dict = {}
 
-    for idx, (label, extra) in enumerate(configs):
+    for idx, (label, extra, save_name) in enumerate(configs):
         print(f"\n  Training: {label}")
 
         run_metrics = {
@@ -293,6 +297,9 @@ def experiment_3(total_episodes: int, eval_interval: int,
             train_vs_random(agent, total_episodes=total_episodes,
                             eval_interval=eval_interval, verbose=False,
                             seed=seed)
+
+            if run == num_runs - 1:
+                agent.save(f"results/agent_exp3_{save_name}.pkl")
 
             opt = compute_policy_optimality(agent, num_states=800)
             w, d, l = evaluate_vs_minimax(agent, episodes=300)
@@ -418,7 +425,7 @@ def main():
     if args.experiment is None or args.experiment == 3:
         experiment_3(ep, iv, num_runs=nr, base_seed=seed)
 
-    print(f"\n✅  All experiments complete. Results saved in results/")
+    print("\n[Done] All experiments complete. Results saved in results/")
 
 
 if __name__ == "__main__":
