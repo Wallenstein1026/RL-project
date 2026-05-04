@@ -1,0 +1,124 @@
+{
+  "vs Random": {
+    "num_runs": 3,
+    "base_seed": 42,
+    "seeds": [
+      142,
+      143,
+      144
+    ],
+    "mean": {
+      "win_vs_random": 0.9896666666666666,
+      "draw_vs_random": 0.010333333333333333,
+      "loss_vs_random": 0.0,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 1.0,
+      "loss_vs_minimax": 0.0,
+      "policy_optimality": 0.9041015803629092,
+      "q_table_size": 8616.0
+    },
+    "std": {
+      "win_vs_random": 0.0012472191289246482,
+      "draw_vs_random": 0.0012472191289246474,
+      "loss_vs_random": 0.0,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.0,
+      "loss_vs_minimax": 0.0,
+      "policy_optimality": 0.0246901404374775,
+      "q_table_size": 2.160246899469287
+    },
+    "individual": [
+      {
+        "win_vs_random": 0.991,
+        "draw_vs_random": 0.009,
+        "loss_vs_random": 0.0,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.9382716049382716,
+        "q_table_size": 8618
+      },
+      {
+        "win_vs_random": 0.99,
+        "draw_vs_random": 0.01,
+        "loss_vs_random": 0.0,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.8807947019867549,
+        "q_table_size": 8617
+      },
+      {
+        "win_vs_random": 0.988,
+        "draw_vs_random": 0.012,
+        "loss_vs_random": 0.0,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.8932384341637011,
+        "q_table_size": 8613
+      }
+    ]
+  },
+  "Self-play": {
+    "num_runs": 3,
+    "base_seed": 42,
+    "seeds": [
+      142,
+      143,
+      144
+    ],
+    "mean": {
+      "win_vs_random": 0.9773333333333333,
+      "draw_vs_random": 0.02266666666666667,
+      "loss_vs_random": 0.0,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 1.0,
+      "loss_vs_minimax": 0.0,
+      "policy_optimality": 0.9778449572256255,
+      "q_table_size": 8604.0
+    },
+    "std": {
+      "win_vs_random": 0.005557777333511028,
+      "draw_vs_random": 0.005557777333511023,
+      "loss_vs_random": 0.0,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.0,
+      "loss_vs_minimax": 0.0,
+      "policy_optimality": 0.002651974975940898,
+      "q_table_size": 2.943920288775949
+    },
+    "individual": [
+      {
+        "win_vs_random": 0.972,
+        "draw_vs_random": 0.028,
+        "loss_vs_random": 0.0,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.9768211920529801,
+        "q_table_size": 8601
+      },
+      {
+        "win_vs_random": 0.975,
+        "draw_vs_random": 0.025,
+        "loss_vs_random": 0.0,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.9752321981424149,
+        "q_table_size": 8608
+      },
+      {
+        "win_vs_random": 0.985,
+        "draw_vs_random": 0.015,
+        "loss_vs_random": 0.0,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.9814814814814815,
+        "q_table_size": 8603
+      }
+    ]
+  }
+}
