@@ -265,106 +265,111 @@ def experiment_2(total_episodes: int, eval_interval: int,
                  num_runs: int = 3, base_seed: int = 42,
                  fixed_epsilon: float = DEFAULT_FIXED_EPSILON) -> None:
     print("\n" + "=" * 70)
-    print(f"  EXPERIMENT 2: Training Paradigm ({BOARD_SIZE}x{BOARD_SIZE}, connect {WIN_LENGTH})")
+    print(f"  EXPERIMENT 2: Training Paradigm × Schedule ({BOARD_SIZE}x{BOARD_SIZE}, connect {WIN_LENGTH})")
     print(f"  Runs per config: {num_runs}  |  Base seed: {base_seed}")
+    print(f"  Paradigms: vs_Random, vs_SelfPlay, vs_RandomThenSelfPlay")
+    print(f"  Schedules : fixed(eps={fixed_epsilon:g}), linear, exponential")
     print("=" * 70)
 
-    all_histories: dict = {}
+    paradigms = ["vs_Random", "vs_SelfPlay", "vs_RandomThenSelfPlay"]
+    schedule_configs = [
+        ("fixed", fixed_epsilon),
+        ("linear", fixed_epsilon),
+        ("exponential", fixed_epsilon),
+    ]
+
+    all_results: dict = {}
     opt_scores: dict = {}
-    all_summaries: dict = {}
+    all_histories: dict = {}
+    config_idx = 0
 
-    paradigms = {
-        "vs Random": "train_vs_random",
-        "Self-play": "train_selfplay",
-    }
+    for paradigm in paradigms:
+        for sched, fe in schedule_configs:
+            config_label = f"{paradigm} + {sched}_eps"
+            save_label = f"exp2_{paradigm}_{sched}"
+            config_idx += 1
 
-    for paradigm, mode in paradigms.items():
-        print(f"\n--- Paradigm: {paradigm} (linear eps) ---")
+            print(f"\n{'='*60}")
+            print(f"  [{config_idx}/9] {config_label}")
+            print(f"{'='*60}")
 
-        run_metrics = {
-            "win_vs_random": [], "draw_vs_random": [], "loss_vs_random": [],
-            "win_vs_minimax": [], "draw_vs_minimax": [], "loss_vs_minimax": [],
-            "policy_optimality": [], "q_table_size": [],
-        }
-        best_run = None
+            run_metrics = {
+                "win_vs_random": [], "draw_vs_random": [], "loss_vs_random": [],
+                "win_vs_minimax": [], "draw_vs_minimax": [], "loss_vs_minimax": [],
+                "policy_optimality": [], "q_table_size": [],
+            }
+            best_run = None
 
-        for run in range(num_runs):
-            seed = base_seed + 100 + run
-            print(f"  [Run {run+1}/{num_runs}] seed={seed}")
+            for run in range(num_runs):
+                seed = base_seed + config_idx * 100 + run
+                print(f"    [Run {run+1}/{num_runs}] seed={seed}")
 
-            if mode == "train_vs_random":
-                agent = QLearningAgent(
-                    player=1,
-                    total_episodes=total_episodes,
-                    **_hp_for_schedule("linear", fixed_epsilon),
-                )
-                hist = train_vs_random(
-                    agent, total_episodes=total_episodes,
-                    eval_interval=eval_interval, verbose=False, seed=seed,
-                )
-                label = "vs Random"
-            else:
-                agent_sp1 = QLearningAgent(
-                    player=1,
-                    total_episodes=total_episodes,
-                    **_hp_for_schedule("linear", fixed_epsilon),
-                )
-                agent_sp2 = QLearningAgent(
-                    player=2,
-                    total_episodes=total_episodes,
-                    **_hp_for_schedule("linear", fixed_epsilon),
-                )
-                hist = train_selfplay(
-                    agent_sp1, agent_sp2,
-                    total_episodes=total_episodes,
-                    eval_interval=eval_interval, verbose=False, seed=seed,
-                )
-                agent = agent_sp1
-                label = "Self-play"
+                hp = _hp_for_schedule(sched, fe)
 
-            summary = print_final_summary(
-                f"{label} (run {run+1})", agent, verbose=False
-            )
-            for k in run_metrics:
-                run_metrics[k].append(summary[k])
-            best_run = _maybe_update_best(
-                best_run, agent, summary, run, seed, history=hist
-            )
+                if paradigm == "vs_SelfPlay":
+                    agent1 = QLearningAgent(
+                        player=1, total_episodes=total_episodes, **hp)
+                    agent2 = QLearningAgent(
+                        player=2, total_episodes=total_episodes, **hp)
+                    hist = train_selfplay(
+                        agent1, agent2, total_episodes=total_episodes,
+                        eval_interval=eval_interval, verbose=False, seed=seed)
+                    agent = agent1
+                elif paradigm == "vs_RandomThenSelfPlay":
+                    from src.training import train_vs_random_then_selfplay
+                    agent = QLearningAgent(
+                        player=1, total_episodes=total_episodes, **hp)
+                    hist = train_vs_random_then_selfplay(
+                        agent, total_episodes=total_episodes,
+                        eval_interval=eval_interval, verbose=False, seed=seed)
+                else:  # vs_Random
+                    agent = QLearningAgent(
+                        player=1, total_episodes=total_episodes, **hp)
+                    hist = train_vs_random(
+                        agent, total_episodes=total_episodes,
+                        eval_interval=eval_interval, verbose=False, seed=seed)
 
-        _print_run_summary(f"{paradigm} - {num_runs} runs", run_metrics)
-        opt_scores[paradigm] = np.mean(run_metrics["policy_optimality"])
-        all_histories[paradigm] = best_run["history"]
-        if mode == "train_vs_random":
-            best_run["agent"].save("results/agent_exp2_vs_random.pkl")
-        else:
-            best_run["agent"].save("results/agent_exp2_selfplay.pkl")
+                summary = print_final_summary(config_label, agent, verbose=False)
+                for k in run_metrics:
+                    run_metrics[k].append(summary[k])
+                best_run = _maybe_update_best(
+                    best_run, agent, summary, run, seed, history=hist)
 
-        all_summaries[paradigm] = {
-            "board_size": BOARD_SIZE,
-            "win_length": WIN_LENGTH,
-            "total_episodes": total_episodes,
-            "eval_interval": eval_interval,
-            "fixed_epsilon": fixed_epsilon,
-            "hyperparameters": _hp_for_schedule("linear", fixed_epsilon),
-            "num_runs": num_runs,
-            "base_seed": base_seed,
-            "seeds": [base_seed + 100 + r for r in range(num_runs)],
-            "best_run": _best_run_metadata(best_run),
-            "mean": {k: np.mean(v) for k, v in run_metrics.items()},
-            "std":  {k: np.std(v) for k, v in run_metrics.items()},
-            "individual": [{k: run_metrics[k][i] for k in run_metrics}
-                           for i in range(num_runs)],
-        }
+            _print_run_summary(f"{config_label} ({num_runs} runs)", run_metrics)
+            opt_scores[config_label] = np.mean(run_metrics["policy_optimality"])
+            all_histories[config_label] = best_run["history"]
+            best_run["agent"].save(f"results/agent_{save_label}.pkl")
 
-    plot_training_curves(all_histories, save_dir="results",
-                         filename="exp2_paradigms.png")
-    plot_policy_optimality_bar(opt_scores, save_dir="results",
-                               filename="exp2_optimality.png")
+            all_results[config_label] = {
+                "paradigm": paradigm,
+                "schedule": sched,
+                "total_episodes": total_episodes,
+                "eval_interval": eval_interval,
+                "fixed_epsilon": fe,
+                "num_runs": num_runs,
+                "hyperparameters": _hp_for_schedule(sched, fe),
+                "seeds": [base_seed + config_idx * 100 + r for r in range(num_runs)],
+                "best_run": _best_run_metadata(best_run),
+                "mean": {k: np.mean(v) for k, v in run_metrics.items()},
+                "std":  {k: np.std(v) for k, v in run_metrics.items()},
+                "individual": [{k: run_metrics[k][i] for k in run_metrics}
+                               for i in range(num_runs)],
+            }
 
-    with open("results/exp2_summaries.json", "w") as f:
-        json.dump(all_summaries, f, indent=2)
+    # Generate plots (non-critical: catch failures so JSON is always saved)
+    try:
+        plot_training_curves(all_histories, save_dir="results",
+                             filename="exp2_extended_paradigms.png")
+        plot_policy_optimality_bar(opt_scores, save_dir="results",
+                                   filename="exp2_extended_optimality.png")
+    except Exception as e:
+        print(f"  [WARNING] Plot generation failed: {e}")
+        print("  JSON results are intact — plots can be regenerated later.")
 
-    print("\n[Exp 2] Done. Figures saved to results/")
+    with open("results/exp2_extended_summaries.json", "w") as f:
+        json.dump(all_results, f, indent=2)
+
+    print("\n[Exp 2] Done. Results -> results/exp2_extended_summaries.json")
 
 
 # =========================================================================== #
@@ -461,6 +466,342 @@ def experiment_3(total_episodes: int, eval_interval: int,
 
 
 # =========================================================================== #
+#  Experiment – Symmetry-Augmented Q-Learning                                   #
+# =========================================================================== #
+
+def experiment_symmetry(total_episodes: int, eval_interval: int,
+                        num_runs: int = 3, base_seed: int = 200) -> None:
+    print("\n" + "=" * 70)
+    print("  EXPERIMENT SYMMETRY: D4 Symmetry-Augmented Q-Learning")
+    print(f"  Runs per config: {num_runs}  |  Base seed: {base_seed}")
+    print("=" * 70)
+
+    configs = [
+        ("baseline_fixed_0.5",  0.5, False),
+        ("symmetry_fixed_0.5",  0.5, True),
+        ("symmetry_fixed_0.3",  0.3, True),
+    ]
+
+    all_results: dict = {}
+    opt_scores: dict = {}
+
+    for idx, (label, fixed_eps, use_sym) in enumerate(configs):
+        sym_str = "ON" if use_sym else "OFF"
+        print(f"\n{'='*60}")
+        print(f"  [{idx+1}/{len(configs)}] {label}  (symmetry={sym_str}, eps={fixed_eps:g})")
+        print(f"{'='*60}")
+
+        run_metrics = {
+            "win_vs_random": [], "draw_vs_random": [], "loss_vs_random": [],
+            "win_vs_minimax": [], "draw_vs_minimax": [], "loss_vs_minimax": [],
+            "policy_optimality": [], "q_table_size": [],
+        }
+        best_run = None
+
+        for run in range(num_runs):
+            seed = base_seed + idx * 10 + run
+            print(f"    [Run {run+1}/{num_runs}] seed={seed}")
+
+            agent = QLearningAgent(
+                player=1,
+                total_episodes=total_episodes,
+                use_symmetry=use_sym,
+                alpha=0.1, gamma=0.9,
+                epsilon_start=fixed_eps,
+                epsilon_end=fixed_eps,
+                schedule="fixed",
+            )
+
+            hist = train_vs_random(
+                agent, total_episodes=total_episodes,
+                eval_interval=eval_interval, verbose=False, seed=seed)
+
+            summary = print_final_summary(label, agent, verbose=False)
+            for k in run_metrics:
+                run_metrics[k].append(summary[k])
+            best_run = _maybe_update_best(
+                best_run, agent, summary, run, seed, history=hist)
+
+            sym_unique = agent._sym_count / max(agent.random_action_count + agent.greedy_action_count, 1) if use_sym else 1.0
+            print(f"      Opt={summary['policy_optimality']:.2%}  "
+                  f"D={summary['draw_vs_minimax']:.2%}  "
+                  f"Q-entries={summary['q_table_size']}"
+                  + (f"  sym-factor={sym_unique:.1f}x" if use_sym else ""))
+
+        _print_run_summary(f"{label} ({num_runs} runs)", run_metrics)
+        opt_scores[label] = np.mean(run_metrics["policy_optimality"])
+        best_run["agent"].save(f"results/agent_sym_{label}.pkl")
+
+        all_results[label] = {
+            "use_symmetry": use_sym,
+            "fixed_epsilon": fixed_eps,
+            "total_episodes": total_episodes,
+            "eval_interval": eval_interval,
+            "num_runs": num_runs,
+            "seeds": [base_seed + idx * 10 + r for r in range(num_runs)],
+            "hyperparameters": {
+                "alpha": 0.1, "gamma": 0.9,
+                "epsilon_start": fixed_eps, "epsilon_end": fixed_eps,
+                "schedule": "fixed", "use_symmetry": use_sym,
+            },
+            "best_run": _best_run_metadata(best_run),
+            "mean": {k: np.mean(v) for k, v in run_metrics.items()},
+            "std":  {k: np.std(v) for k, v in run_metrics.items()},
+            "individual": [{k: run_metrics[k][i] for k in run_metrics}
+                           for i in range(num_runs)],
+        }
+
+    try:
+        plot_policy_optimality_bar(opt_scores, save_dir="results",
+                                   filename="exp_symmetry_optimality.png")
+    except Exception as e:
+        print(f"  [WARNING] Plot generation failed: {e}")
+
+    with open("results/exp_symmetry_summaries.json", "w") as f:
+        json.dump(all_results, f, indent=2)
+
+    print("\n[Symmetry] Done. Results -> results/exp_symmetry_summaries.json")
+
+
+# =========================================================================== #
+#  Experiment – UCB Exploration (replaces epsilon-greedy)                       #
+# =========================================================================== #
+
+def experiment_ucb(total_episodes: int, eval_interval: int,
+                   num_runs: int = 3) -> None:
+    from src.agents import UCBQLearningAgent
+
+    # Part 1: vs_Random × [c=0.5, 1.0, 2.0, 5.0] (like epsilon-greedy Exp1)
+    # Part 2: 3 paradigms × c=2.0 (like epsilon-greedy Exp2)
+    # Part 3: Evaluate Part 1 agents vs Minimax
+
+    # ------------------------------------------------------------------ #
+    #  Part 1 – UCB c-parameter grid (vs_Random, same seeds as Exp1)        #
+    # ------------------------------------------------------------------ #
+
+    print("\n" + "=" * 70)
+    print("  UCB PART 1: c-Parameter Grid (vs_Random)")
+    print(f"  Runs per config: {num_runs}")
+    print("=" * 70)
+
+    c_grid = [0.5, 1.0, 2.0, 5.0]
+    exp1_seeds = [42, 43, 44]
+
+    all_results_ucb1: dict = {}
+    opt_scores_ucb1: dict = {}
+    all_histories_ucb1: dict = {}
+    ucb1_agents: dict = {}
+
+    for c_val in c_grid:
+        label = f"ucb_c_{c_val:g}"
+        c_str = f"{c_val:g}".replace(".", "p")
+        print(f"\n--- UCB c={c_val:g} (vs_Random) ---")
+
+        run_metrics = {
+            "win_vs_random": [], "draw_vs_random": [], "loss_vs_random": [],
+            "win_vs_minimax": [], "draw_vs_minimax": [], "loss_vs_minimax": [],
+            "policy_optimality": [], "q_table_size": [],
+        }
+        best_run = None
+
+        for run in range(num_runs):
+            seed = exp1_seeds[run]
+            print(f"  [Run {run+1}/{num_runs}] seed={seed}")
+
+            agent = UCBQLearningAgent(player=1, c=c_val)
+            hist = train_vs_random(
+                agent, total_episodes=total_episodes,
+                eval_interval=eval_interval, verbose=False, seed=seed)
+
+            summary = print_final_summary(label, agent, verbose=False)
+            for k in run_metrics:
+                run_metrics[k].append(summary[k])
+            best_run = _maybe_update_best(
+                best_run, agent, summary, run, seed, history=hist)
+
+            print(f"      Opt={summary['policy_optimality']:.2%}  "
+                  f"D_M={summary['draw_vs_minimax']:.2%}  "
+                  f"Q={summary['q_table_size']}")
+
+        _print_run_summary(f"{label} ({num_runs} runs)", run_metrics)
+        opt_scores_ucb1[label] = np.mean(run_metrics["policy_optimality"])
+        all_histories_ucb1[label] = best_run["history"]
+        best_run["agent"].save(f"results/agent_ucb1_{c_str}.pkl")
+        ucb1_agents[label] = best_run["agent"]
+
+        all_results_ucb1[label] = {
+            "c": c_val,
+            "total_episodes": total_episodes,
+            "eval_interval": eval_interval,
+            "num_runs": num_runs,
+            "seeds": list(exp1_seeds),
+            "hyperparameters": {"alpha": 0.1, "gamma": 0.9, "c": c_val},
+            "best_run": _best_run_metadata(best_run),
+            "mean": {k: np.mean(v) for k, v in run_metrics.items()},
+            "std":  {k: np.std(v) for k, v in run_metrics.items()},
+            "individual": [{k: run_metrics[k][i] for k in run_metrics}
+                           for i in range(num_runs)],
+        }
+
+    # Save Part 1
+    try:
+        plot_training_curves(all_histories_ucb1, save_dir="results",
+                             filename="exp_ucb1_schedules.png")
+        plot_policy_optimality_bar(opt_scores_ucb1, save_dir="results",
+                                   filename="exp_ucb1_optimality.png")
+    except Exception as e:
+        print(f"  [WARNING] Plot: {e}")
+
+    with open("results/exp_ucb1_summaries.json", "w") as f:
+        json.dump(all_results_ucb1, f, indent=2)
+
+    # Identify best c (highest draw_vs_minimax mean)
+    best_c = max(c_grid, key=lambda c: all_results_ucb1[f"ucb_c_{c:g}"]["mean"]["draw_vs_minimax"])
+    print(f"\n  Best c from Part 1: {best_c}")
+
+    # ------------------------------------------------------------------ #
+    #  Part 2 – UCB paradigms (best c, same seeds as epsilon-greedy Exp2)   #
+    # ------------------------------------------------------------------ #
+
+    print("\n" + "=" * 70)
+    print(f"  UCB PART 2: Training Paradigms (c={best_c})")
+    print(f"  Runs per config: {num_runs}")
+    print("=" * 70)
+
+    paradigms = ["vs_Random", "vs_SelfPlay", "vs_RandomThenSelfPlay"]
+    # Seeds matching epsilon-greedy Exp2 fixed-epsilon configs
+    paradigm_seeds = {
+        "vs_Random":             [142, 143, 144],
+        "vs_SelfPlay":           [442, 443, 444],
+        "vs_RandomThenSelfPlay": [742, 743, 744],
+    }
+
+    all_results_ucb2: dict = {}
+    opt_scores_ucb2: dict = {}
+
+    for paradigm in paradigms:
+        label = f"{paradigm} + ucb"
+        seeds = paradigm_seeds[paradigm]
+        print(f"\n--- {label} ---")
+
+        run_metrics = {
+            "win_vs_random": [], "draw_vs_random": [], "loss_vs_random": [],
+            "win_vs_minimax": [], "draw_vs_minimax": [], "loss_vs_minimax": [],
+            "policy_optimality": [], "q_table_size": [],
+        }
+        best_run = None
+
+        for run in range(num_runs):
+            seed = seeds[run]
+            print(f"  [Run {run+1}/{num_runs}] seed={seed}")
+
+            if paradigm == "vs_SelfPlay":
+                agent1 = UCBQLearningAgent(player=1, c=best_c)
+                agent2 = UCBQLearningAgent(player=2, c=best_c)
+                hist = train_selfplay(
+                    agent1, agent2, total_episodes=total_episodes,
+                    eval_interval=eval_interval, verbose=False, seed=seed)
+                agent = agent1
+            elif paradigm == "vs_RandomThenSelfPlay":
+                from src.training import train_vs_random_then_selfplay
+                agent = UCBQLearningAgent(player=1, c=best_c)
+                hist = train_vs_random_then_selfplay(
+                    agent, total_episodes=total_episodes,
+                    eval_interval=eval_interval, verbose=False, seed=seed)
+            else:
+                agent = UCBQLearningAgent(player=1, c=best_c)
+                hist = train_vs_random(
+                    agent, total_episodes=total_episodes,
+                    eval_interval=eval_interval, verbose=False, seed=seed)
+
+            summary = print_final_summary(label, agent, verbose=False)
+            for k in run_metrics:
+                run_metrics[k].append(summary[k])
+            best_run = _maybe_update_best(
+                best_run, agent, summary, run, seed, history=hist)
+
+            print(f"      Opt={summary['policy_optimality']:.2%}  "
+                  f"D_M={summary['draw_vs_minimax']:.2%}  "
+                  f"Q={summary['q_table_size']}")
+
+        _print_run_summary(f"{label} ({num_runs} runs)", run_metrics)
+        opt_scores_ucb2[label] = np.mean(run_metrics["policy_optimality"])
+        best_run["agent"].save(f"results/agent_ucb2_{paradigm}.pkl")
+
+        all_results_ucb2[label] = {
+            "paradigm": paradigm,
+            "c": best_c,
+            "total_episodes": total_episodes,
+            "eval_interval": eval_interval,
+            "num_runs": num_runs,
+            "seeds": seeds,
+            "hyperparameters": {"alpha": 0.1, "gamma": 0.9, "c": best_c},
+            "best_run": _best_run_metadata(best_run),
+            "mean": {k: np.mean(v) for k, v in run_metrics.items()},
+            "std":  {k: np.std(v) for k, v in run_metrics.items()},
+            "individual": [{k: run_metrics[k][i] for k in run_metrics}
+                           for i in range(num_runs)],
+        }
+
+    try:
+        plot_training_curves({}, save_dir="results",
+                             filename="exp_ucb2_paradigms.png")  # placeholder
+        plot_policy_optimality_bar(opt_scores_ucb2, save_dir="results",
+                                   filename="exp_ucb2_optimality.png")
+    except Exception as e:
+        print(f"  [WARNING] Plot: {e}")
+
+    with open("results/exp_ucb2_summaries.json", "w") as f:
+        json.dump(all_results_ucb2, f, indent=2)
+
+    # ------------------------------------------------------------------ #
+    #  Part 3 – UCB vs Minimax (re-use Part 1 agents, like Exp3)           #
+    # ------------------------------------------------------------------ #
+
+    print("\n" + "=" * 70)
+    print("  UCB PART 3: vs Minimax Baseline")
+    print("=" * 70)
+
+    all_results_ucb3: dict = {}
+    opt_scores_ucb3: dict = {}
+
+    for c_val in c_grid:
+        label = f"ucb_c_{c_val:g}"
+        agent = ucb1_agents[label]
+        display_label = f"vs_Random + ucb_c_{c_val:g}"
+        print(f"\n  Evaluating {display_label}")
+
+        opt = compute_policy_optimality(agent, num_states=800)
+        w, d, l = evaluate_vs_minimax(agent, episodes=300)
+        summary = {
+            "win_vs_minimax": w / 300,
+            "draw_vs_minimax": d / 300,
+            "loss_vs_minimax": l / 300,
+            "policy_optimality": opt,
+        }
+        print(f"      Opt={opt:.2%}  W={w/300:.2%}  D={d/300:.2%}  L={l/300:.2%}")
+
+        opt_scores_ucb3[label] = opt
+        all_results_ucb3[label] = {
+            "c": c_val,
+            "hyperparameters": {"alpha": 0.1, "gamma": 0.9, "c": c_val},
+            "metrics": summary,
+        }
+
+    try:
+        plot_policy_optimality_bar(opt_scores_ucb3, save_dir="results",
+                                   filename="exp_ucb3_optimality.png")
+    except Exception as e:
+        print(f"  [WARNING] Plot: {e}")
+
+    with open("results/exp_ucb3_summaries.json", "w") as f:
+        json.dump(all_results_ucb3, f, indent=2)
+
+    print("\n[UCB] All parts done. Results saved to results/exp_ucb*.json")
+
+
+
+# =========================================================================== #
 #  Interactive play                                                              #
 # =========================================================================== #
 
@@ -526,8 +867,9 @@ def parse_args():
                    help=f"Total training episodes (default: {DEFAULT_EPISODES})")
     p.add_argument("--eval-interval", type=int, default=2_000,
                    help="Evaluation checkpoint interval (default: 2000)")
-    p.add_argument("--experiment", type=int, choices=[1, 2, 3], default=None,
-                   help="Run only experiment 1, 2, or 3 (default: all)")
+    p.add_argument("--experiment", type=str,
+                   choices=["1", "2", "3", "symmetry", "ucb", "all"], default="all",
+                   help="Run specific experiment: 1, 2, 3, symmetry, ucb, or all (default: all)")
     p.add_argument("--num-runs", type=int, default=3,
                    help="Number of runs per config for statistics (default: 3)")
     p.add_argument("--seed", type=int, default=42,
@@ -564,15 +906,21 @@ def main():
     if not 0.0 <= fixed_epsilon <= 1.0:
         raise ValueError("--fixed-epsilon must be between 0 and 1")
 
-    if args.experiment is None or args.experiment == 1:
+    run_all = args.experiment == "all"
+
+    if run_all or args.experiment == "1":
         experiment_1(ep, iv, num_runs=nr, base_seed=seed,
                      fixed_epsilon_grid=fixed_epsilon_grid)
-    if args.experiment is None or args.experiment == 2:
+    if run_all or args.experiment == "2":
         experiment_2(ep, iv, num_runs=nr, base_seed=seed,
                      fixed_epsilon=fixed_epsilon)
-    if args.experiment is None or args.experiment == 3:
+    if run_all or args.experiment == "3":
         experiment_3(ep, iv, num_runs=nr, base_seed=seed,
                      fixed_epsilon_grid=fixed_epsilon_grid)
+    if run_all or args.experiment == "symmetry":
+        experiment_symmetry(ep, iv, num_runs=nr, base_seed=200)
+    if run_all or args.experiment == "ucb":
+        experiment_ucb(ep, iv, num_runs=nr)
 
     print("\n[Done] All experiments complete. Results saved in results/")
 

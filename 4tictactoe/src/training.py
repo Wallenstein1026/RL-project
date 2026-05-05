@@ -267,3 +267,95 @@ def train_selfplay(
             agent1.greedy_action_count = 0
 
     return history
+
+
+def train_vs_random_then_selfplay(
+    agent: QLearningAgent,
+    total_episodes: int = 100_000,
+    eval_interval: int = 1_000,
+    eval_episodes: int = 500,
+    verbose: bool = True,
+    seed: Optional[int] = None,
+) -> Dict:
+    """
+    Train agent first vs random opponent (first half of episodes), then
+    transition to self-play (second half). The self-play opponent uses
+    a copy of the agent frozen at the transition point.
+    """
+    if seed is not None:
+        np.random.seed(seed)
+
+    env = TicTacToeEnv()
+    opponent_random = RandomAgent(player=2)
+
+    transition_ep = total_episodes // 2
+
+    history = {
+        "episode": [],
+        "epsilon": [],
+        "avg_reward": [],
+        "win_rate_vs_random": [],
+        "draw_rate_vs_random": [],
+        "random_action_fraction": [],
+        "td_error": [],
+    }
+
+    reward_buffer: List[float] = []
+    td_buffer: List[float] = []
+
+    opponent_agent = None  # self-play opponent (initialized at transition)
+
+    for ep in range(total_episodes):
+        agent.update_epsilon(ep)
+
+        if ep < transition_ep:
+            # Phase 1: vs Random
+            reward, avg_td = _run_episode_vs_random(env, agent, opponent_random)
+            reward_buffer.append(reward)
+            td_buffer.append(avg_td)
+        else:
+            # Phase 2: Self-play
+            if opponent_agent is None:
+                # Clone agent at transition point
+                import copy
+                opponent_agent = copy.deepcopy(agent)
+                opponent_agent.player = 2
+                if verbose:
+                    print(f"[Ep {ep+1:>7d}] === Switching to self-play ===")
+
+            opponent_agent.update_epsilon(ep)
+            r1, _, td1, _ = _run_episode_selfplay(env, agent, opponent_agent)
+            reward_buffer.append(r1)
+            td_buffer.append(td1)
+
+        if (ep + 1) % eval_interval == 0:
+            from .evaluation import evaluate_vs_random
+            wins, draws, _ = evaluate_vs_random(agent, episodes=eval_episodes)
+            avg_r = float(np.mean(reward_buffer[-eval_interval:]))
+            avg_td_window = float(np.mean(td_buffer[-eval_interval:]))
+
+            total_actions = agent.random_action_count + agent.greedy_action_count
+            rand_frac = (agent.random_action_count / total_actions
+                         if total_actions > 0 else 0.0)
+
+            history["episode"].append(ep + 1)
+            history["epsilon"].append(agent.epsilon)
+            history["avg_reward"].append(avg_r)
+            history["win_rate_vs_random"].append(wins / eval_episodes)
+            history["draw_rate_vs_random"].append(draws / eval_episodes)
+            history["random_action_fraction"].append(rand_frac)
+            history["td_error"].append(avg_td_window)
+
+            if verbose:
+                phase = "SP" if ep >= transition_ep else "R"
+                print(
+                    f"[Ep {ep+1:>7d}] [{phase}] eps={agent.epsilon:.4f}  "
+                    f"avg_r={avg_r:+.3f}  "
+                    f"win={wins/eval_episodes:.2%}  "
+                    f"draw={draws/eval_episodes:.2%}"
+                )
+
+            agent.random_action_count = 0
+            agent.greedy_action_count = 0
+
+    return history

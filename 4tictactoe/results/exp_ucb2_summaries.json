@@ -1,0 +1,113 @@
+{
+  "vs_Random + ucb": {
+    "paradigm": "vs_Random",
+    "c": 0.5,
+    "note": "Best-agent eval only (per-seed lost due to crash before JSON save)",
+    "best_agent_metrics": {
+      "policy_optimality": 0.369620253164557,
+      "draw_vs_minimax": 0.6666666666666666,
+      "win_vs_minimax": 0.0,
+      "loss_vs_minimax": 0.3333333333333333
+    }
+  },
+  "vs_SelfPlay + ucb": {
+    "paradigm": "vs_SelfPlay",
+    "c": 0.5,
+    "note": "Best-agent eval only (per-seed lost due to crash before JSON save)",
+    "best_agent_metrics": {
+      "policy_optimality": 0.3436754176610978,
+      "draw_vs_minimax": 0.35333333333333333,
+      "win_vs_minimax": 0.0,
+      "loss_vs_minimax": 0.6466666666666666
+    }
+  },
+  "vs_RandomThenSelfPlay + ucb": {
+    "paradigm": "vs_RandomThenSelfPlay",
+    "c": 0.5,
+    "total_episodes": 500000,
+    "eval_interval": 2000,
+    "num_runs": 3,
+    "seeds": [
+      742,
+      743,
+      744
+    ],
+    "hyperparameters": {
+      "alpha": 0.1,
+      "gamma": 0.9,
+      "c": 0.5
+    },
+    "best_run": {
+      "run_index": 2,
+      "seed": 744,
+      "selection_score": [
+        0.22666666666666666,
+        0.12,
+        0.719,
+        -0.7733333333333333
+      ],
+      "metrics": {
+        "win_vs_random": 0.719,
+        "draw_vs_random": 0.204,
+        "loss_vs_random": 0.077,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.22666666666666666,
+        "loss_vs_minimax": 0.7733333333333333,
+        "policy_optimality": 0.12,
+        "q_table_size": 2305502
+      }
+    },
+    "mean": {
+      "win_vs_random": 0.7156666666666666,
+      "draw_vs_random": 0.19399999999999998,
+      "loss_vs_random": 0.09033333333333333,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.1411111111111111,
+      "loss_vs_minimax": 0.8588888888888889,
+      "policy_optimality": 0.21716666666666665,
+      "q_table_size": 2305371.3333333335
+    },
+    "std": {
+      "win_vs_random": 0.004027681991198194,
+      "draw_vs_random": 0.009092121131323903,
+      "loss_vs_random": 0.013021349989749739,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.06051221690751156,
+      "loss_vs_minimax": 0.06051221690751157,
+      "policy_optimality": 0.12084172384661775,
+      "q_table_size": 106.1487425999741
+    },
+    "individual": [
+      {
+        "win_vs_random": 0.718,
+        "draw_vs_random": 0.196,
+        "loss_vs_random": 0.086,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.09666666666666666,
+        "loss_vs_minimax": 0.9033333333333333,
+        "policy_optimality": 0.3875,
+        "q_table_size": 2305242
+      },
+      {
+        "win_vs_random": 0.71,
+        "draw_vs_random": 0.182,
+        "loss_vs_random": 0.108,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.1,
+        "loss_vs_minimax": 0.9,
+        "policy_optimality": 0.144,
+        "q_table_size": 2305370
+      },
+      {
+        "win_vs_random": 0.719,
+        "draw_vs_random": 0.204,
+        "loss_vs_random": 0.077,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.22666666666666666,
+        "loss_vs_minimax": 0.7733333333333333,
+        "policy_optimality": 0.12,
+        "q_table_size": 2305502
+      }
+    ]
+  }
+}

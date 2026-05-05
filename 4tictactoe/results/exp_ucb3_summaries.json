@@ -1,0 +1,58 @@
+{
+  "ucb_c_0.5": {
+    "c": 0.5,
+    "hyperparameters": {
+      "alpha": 0.1,
+      "gamma": 0.9,
+      "c": 0.5
+    },
+    "metrics": {
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.56,
+      "loss_vs_minimax": 0.44,
+      "policy_optimality": 0.34102564102564104
+    }
+  },
+  "ucb_c_1": {
+    "c": 1.0,
+    "hyperparameters": {
+      "alpha": 0.1,
+      "gamma": 0.9,
+      "c": 1.0
+    },
+    "metrics": {
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.10666666666666667,
+      "loss_vs_minimax": 0.8933333333333333,
+      "policy_optimality": 0.2904040404040404
+    }
+  },
+  "ucb_c_2": {
+    "c": 2.0,
+    "hyperparameters": {
+      "alpha": 0.1,
+      "gamma": 0.9,
+      "c": 2.0
+    },
+    "metrics": {
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.16333333333333333,
+      "loss_vs_minimax": 0.8366666666666667,
+      "policy_optimality": 0.12532637075718014
+    }
+  },
+  "ucb_c_5": {
+    "c": 5.0,
+    "hyperparameters": {
+      "alpha": 0.1,
+      "gamma": 0.9,
+      "c": 5.0
+    },
+    "metrics": {
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.21,
+      "loss_vs_minimax": 0.79,
+      "policy_optimality": 0.12594458438287154
+    }
+  }
+}

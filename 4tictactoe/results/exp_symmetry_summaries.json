@@ -1,0 +1,278 @@
+{
+  "baseline_fixed_0.5": {
+    "use_symmetry": false,
+    "fixed_epsilon": 0.5,
+    "total_episodes": 500000,
+    "eval_interval": 2000,
+    "num_runs": 3,
+    "seeds": [
+      200,
+      201,
+      202
+    ],
+    "hyperparameters": {
+      "alpha": 0.1,
+      "gamma": 0.9,
+      "epsilon_start": 0.5,
+      "epsilon_end": 0.5,
+      "schedule": "fixed",
+      "use_symmetry": false
+    },
+    "best_run": {
+      "run_index": 2,
+      "seed": 202,
+      "selection_score": [
+        0.48,
+        0.08921933085501858,
+        0.868,
+        -0.52
+      ],
+      "metrics": {
+        "win_vs_random": 0.868,
+        "draw_vs_random": 0.089,
+        "loss_vs_random": 0.043,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.48,
+        "loss_vs_minimax": 0.52,
+        "policy_optimality": 0.08921933085501858,
+        "q_table_size": 1719257
+      }
+    },
+    "mean": {
+      "win_vs_random": 0.8636666666666666,
+      "draw_vs_random": 0.09633333333333334,
+      "loss_vs_random": 0.04,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.1722222222222222,
+      "loss_vs_minimax": 0.8277777777777778,
+      "policy_optimality": 0.07128273981901935,
+      "q_table_size": 1732630.6666666667
+    },
+    "std": {
+      "win_vs_random": 0.0030912061651652374,
+      "draw_vs_random": 0.0051854497287013536,
+      "loss_vs_random": 0.0021602468994692853,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.21814594729443787,
+      "loss_vs_minimax": 0.21814594729443784,
+      "policy_optimality": 0.012959274174953966,
+      "q_table_size": 13376.302486943925
+    },
+    "individual": [
+      {
+        "win_vs_random": 0.861,
+        "draw_vs_random": 0.1,
+        "loss_vs_random": 0.039,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.0,
+        "loss_vs_minimax": 1.0,
+        "policy_optimality": 0.06557377049180328,
+        "q_table_size": 1727731
+      },
+      {
+        "win_vs_random": 0.862,
+        "draw_vs_random": 0.1,
+        "loss_vs_random": 0.038,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.03666666666666667,
+        "loss_vs_minimax": 0.9633333333333334,
+        "policy_optimality": 0.05905511811023622,
+        "q_table_size": 1750904
+      },
+      {
+        "win_vs_random": 0.868,
+        "draw_vs_random": 0.089,
+        "loss_vs_random": 0.043,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.48,
+        "loss_vs_minimax": 0.52,
+        "policy_optimality": 0.08921933085501858,
+        "q_table_size": 1719257
+      }
+    ]
+  },
+  "symmetry_fixed_0.5": {
+    "use_symmetry": true,
+    "fixed_epsilon": 0.5,
+    "total_episodes": 500000,
+    "eval_interval": 2000,
+    "num_runs": 3,
+    "seeds": [
+      210,
+      211,
+      212
+    ],
+    "hyperparameters": {
+      "alpha": 0.1,
+      "gamma": 0.9,
+      "epsilon_start": 0.5,
+      "epsilon_end": 0.5,
+      "schedule": "fixed",
+      "use_symmetry": true
+    },
+    "best_run": {
+      "run_index": 1,
+      "seed": 211,
+      "selection_score": [
+        1.0,
+        0.43873517786561267,
+        0.952,
+        -0.0
+      ],
+      "metrics": {
+        "win_vs_random": 0.952,
+        "draw_vs_random": 0.031,
+        "loss_vs_random": 0.017,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.43873517786561267,
+        "q_table_size": 8473936
+      }
+    },
+    "mean": {
+      "win_vs_random": 0.9553333333333333,
+      "draw_vs_random": 0.029333333333333333,
+      "loss_vs_random": 0.015333333333333332,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.3333333333333333,
+      "loss_vs_minimax": 0.6666666666666666,
+      "policy_optimality": 0.35859461449523566,
+      "q_table_size": 8384430.666666667
+    },
+    "std": {
+      "win_vs_random": 0.004714045207910321,
+      "draw_vs_random": 0.0023570226039551587,
+      "loss_vs_random": 0.002357022603955159,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.4714045207910317,
+      "loss_vs_minimax": 0.4714045207910317,
+      "policy_optimality": 0.12979451308109693,
+      "q_table_size": 63448.25537571717
+    },
+    "individual": [
+      {
+        "win_vs_random": 0.962,
+        "draw_vs_random": 0.026,
+        "loss_vs_random": 0.012,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.0,
+        "loss_vs_minimax": 1.0,
+        "policy_optimality": 0.17551020408163265,
+        "q_table_size": 8334190
+      },
+      {
+        "win_vs_random": 0.952,
+        "draw_vs_random": 0.031,
+        "loss_vs_random": 0.017,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.43873517786561267,
+        "q_table_size": 8473936
+      },
+      {
+        "win_vs_random": 0.952,
+        "draw_vs_random": 0.031,
+        "loss_vs_random": 0.017,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.0,
+        "loss_vs_minimax": 1.0,
+        "policy_optimality": 0.46153846153846156,
+        "q_table_size": 8345166
+      }
+    ]
+  },
+  "symmetry_fixed_0.3": {
+    "use_symmetry": true,
+    "fixed_epsilon": 0.3,
+    "total_episodes": 500000,
+    "eval_interval": 2000,
+    "num_runs": 3,
+    "seeds": [
+      220,
+      221,
+      222
+    ],
+    "hyperparameters": {
+      "alpha": 0.1,
+      "gamma": 0.9,
+      "epsilon_start": 0.3,
+      "epsilon_end": 0.3,
+      "schedule": "fixed",
+      "use_symmetry": true
+    },
+    "best_run": {
+      "run_index": 1,
+      "seed": 221,
+      "selection_score": [
+        1.0,
+        0.1522633744855967,
+        0.954,
+        -0.0
+      ],
+      "metrics": {
+        "win_vs_random": 0.954,
+        "draw_vs_random": 0.036,
+        "loss_vs_random": 0.01,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.1522633744855967,
+        "q_table_size": 5751200
+      }
+    },
+    "mean": {
+      "win_vs_random": 0.926,
+      "draw_vs_random": 0.05466666666666667,
+      "loss_vs_random": 0.01933333333333333,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.49666666666666665,
+      "loss_vs_minimax": 0.5033333333333333,
+      "policy_optimality": 0.09000974063243643,
+      "q_table_size": 6453728.666666667
+    },
+    "std": {
+      "win_vs_random": 0.0197989898732233,
+      "draw_vs_random": 0.013299958228840005,
+      "loss_vs_random": 0.006798692684790379,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.40827550610940266,
+      "loss_vs_minimax": 0.40827550610940266,
+      "policy_optimality": 0.044166869635828755,
+      "q_table_size": 499630.76196816476
+    },
+    "individual": [
+      {
+        "win_vs_random": 0.912,
+        "draw_vs_random": 0.066,
+        "loss_vs_random": 0.022,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.0,
+        "loss_vs_minimax": 1.0,
+        "policy_optimality": 0.06329113924050633,
+        "q_table_size": 6739522
+      },
+      {
+        "win_vs_random": 0.954,
+        "draw_vs_random": 0.036,
+        "loss_vs_random": 0.01,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 1.0,
+        "loss_vs_minimax": 0.0,
+        "policy_optimality": 0.1522633744855967,
+        "q_table_size": 5751200
+      },
+      {
+        "win_vs_random": 0.912,
+        "draw_vs_random": 0.062,
+        "loss_vs_random": 0.026,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.49,
+        "loss_vs_minimax": 0.51,
+        "policy_optimality": 0.054474708171206226,
+        "q_table_size": 6870464
+      }
+    ]
+  }
+}
