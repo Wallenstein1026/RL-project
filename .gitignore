@@ -7,4 +7,5 @@ __pycache__/
 
 # Large binary results
 *.pkl
+!3tictactoe/results/*.pkl
 *.log

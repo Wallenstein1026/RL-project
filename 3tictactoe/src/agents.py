@@ -81,7 +81,7 @@ class QLearningAgent:
         self,
         player: int = 1,
         alpha: float = 0.1,
-        gamma: float = 0.9,
+        gamma: float = 1.0,
         epsilon_start: float = 1.0,
         epsilon_end: float = 0.01,
         schedule: str = "linear",
@@ -143,6 +143,13 @@ class QLearningAgent:
             target = reward + self.gamma * self.get_max_q(next_state, next_available)
 
         td_error = target - current_q
+        self.q_table[(state, action)] = current_q + self.alpha * td_error
+        return td_error
+
+    def update_mc(self, state: tuple, action: int, g_return: float) -> float:
+        """Every-visit MC / full-return target: Q ← Q + α (G − Q)."""
+        current_q = self.get_q(state, action)
+        td_error = g_return - current_q
         self.q_table[(state, action)] = current_q + self.alpha * td_error
         return td_error
 
