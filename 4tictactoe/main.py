@@ -19,6 +19,7 @@ Usage
     python main.py                          # run all experiments (default)
     python main.py --episodes 50000         # shorter run for quick testing
     python main.py --experiment 1           # run only experiment 1
+    python main.py --experiment selfplay_symmetry
     python main.py --num-runs 5             # 5 runs per config (statistics)
     python main.py --seed 42                # base seed for reproducibility
     python main.py --fixed-epsilon-grid 0.1,0.2,0.3,0.5
@@ -113,6 +114,7 @@ def _run_score(metrics: dict) -> tuple:
     """
     return (
         metrics.get("draw_vs_minimax", 0.0),
+        metrics.get("draw_vs_minimax_p2", 0.0),
         metrics.get("policy_optimality", 0.0),
         metrics.get("win_vs_random", 0.0),
         -metrics.get("loss_vs_minimax", 0.0),
@@ -192,6 +194,7 @@ def experiment_1(total_episodes: int, eval_interval: int,
         run_metrics = {
             "win_vs_random": [], "draw_vs_random": [], "loss_vs_random": [],
             "win_vs_minimax": [], "draw_vs_minimax": [], "loss_vs_minimax": [],
+            "win_vs_minimax_p2": [], "draw_vs_minimax_p2": [], "loss_vs_minimax_p2": [],
             "policy_optimality": [], "q_table_size": [],
         }
         best_run = None
@@ -296,6 +299,7 @@ def experiment_2(total_episodes: int, eval_interval: int,
             run_metrics = {
                 "win_vs_random": [], "draw_vs_random": [], "loss_vs_random": [],
                 "win_vs_minimax": [], "draw_vs_minimax": [], "loss_vs_minimax": [],
+                "win_vs_minimax_p2": [], "draw_vs_minimax_p2": [], "loss_vs_minimax_p2": [],
                 "policy_optimality": [], "q_table_size": [],
             }
             best_run = None
@@ -402,6 +406,7 @@ def experiment_3(total_episodes: int, eval_interval: int,
 
         run_metrics = {
             "win_vs_minimax": [], "draw_vs_minimax": [], "loss_vs_minimax": [],
+            "win_vs_minimax_p2": [], "draw_vs_minimax_p2": [], "loss_vs_minimax_p2": [],
             "policy_optimality": [],
         }
         best_run = None
@@ -421,10 +426,14 @@ def experiment_3(total_episodes: int, eval_interval: int,
 
             opt = compute_policy_optimality(agent, num_states=800)
             w, d, l = evaluate_vs_minimax(agent, episodes=300)
+            w2, d2, l2 = evaluate_vs_minimax(agent, episodes=300, agent_player=2)
             summary = {
                 "win_vs_minimax": w / 300,
                 "draw_vs_minimax": d / 300,
                 "loss_vs_minimax": l / 300,
+                "win_vs_minimax_p2": w2 / 300,
+                "draw_vs_minimax_p2": d2 / 300,
+                "loss_vs_minimax_p2": l2 / 300,
                 "policy_optimality": opt,
             }
 
@@ -432,9 +441,12 @@ def experiment_3(total_episodes: int, eval_interval: int,
             run_metrics["win_vs_minimax"].append(w / 300)
             run_metrics["draw_vs_minimax"].append(d / 300)
             run_metrics["loss_vs_minimax"].append(l / 300)
+            run_metrics["win_vs_minimax_p2"].append(w2 / 300)
+            run_metrics["draw_vs_minimax_p2"].append(d2 / 300)
+            run_metrics["loss_vs_minimax_p2"].append(l2 / 300)
             best_run = _maybe_update_best(best_run, agent, summary, run, seed)
 
-            print(f"      Opt={opt:.2%}  W={w/300:.2%}  D={d/300:.2%}  L={l/300:.2%}")
+            print(f"      Opt={opt:.2%}  P1 D={d/300:.2%}  P2 D={d2/300:.2%}")
 
         opt_scores[label] = np.mean(run_metrics["policy_optimality"])
         best_run["agent"].save(f"results/agent_exp3_{save_name}.pkl")
@@ -494,6 +506,7 @@ def experiment_symmetry(total_episodes: int, eval_interval: int,
         run_metrics = {
             "win_vs_random": [], "draw_vs_random": [], "loss_vs_random": [],
             "win_vs_minimax": [], "draw_vs_minimax": [], "loss_vs_minimax": [],
+            "win_vs_minimax_p2": [], "draw_vs_minimax_p2": [], "loss_vs_minimax_p2": [],
             "policy_optimality": [], "q_table_size": [],
         }
         best_run = None
@@ -524,7 +537,8 @@ def experiment_symmetry(total_episodes: int, eval_interval: int,
 
             sym_unique = agent._sym_count / max(agent.random_action_count + agent.greedy_action_count, 1) if use_sym else 1.0
             print(f"      Opt={summary['policy_optimality']:.2%}  "
-                  f"D={summary['draw_vs_minimax']:.2%}  "
+                  f"P1_D={summary['draw_vs_minimax']:.2%}  "
+                  f"P2_D={summary['draw_vs_minimax_p2']:.2%}  "
                   f"Q-entries={summary['q_table_size']}"
                   + (f"  sym-factor={sym_unique:.1f}x" if use_sym else ""))
 
@@ -564,7 +578,111 @@ def experiment_symmetry(total_episodes: int, eval_interval: int,
 
 
 # =========================================================================== #
-#  Experiment – UCB Exploration (replaces epsilon-greedy)                       #
+#  Experiment - Self-Play + Symmetry                                           #
+# =========================================================================== #
+
+def experiment_selfplay_symmetry(total_episodes: int, eval_interval: int,
+                                 num_runs: int = 3,
+                                 base_seed: int = 300) -> None:
+    print("\n" + "=" * 70)
+    print("  EXPERIMENT SELFPLAY+SYMMETRY: D4 Symmetry in Self-Play")
+    print(f"  Runs per config: {num_runs}  |  Base seed: {base_seed}")
+    print("=" * 70)
+
+    configs = [
+        ("selfplay_symmetry_fixed_0.3", 0.3),
+        ("selfplay_symmetry_fixed_0.5", 0.5),
+    ]
+
+    all_results: dict = {}
+    all_histories: dict = {}
+    opt_scores: dict = {}
+
+    for idx, (label, fixed_eps) in enumerate(configs):
+        print(f"\n{'='*60}")
+        print(f"  [{idx+1}/{len(configs)}] {label}  (symmetry=ON, eps={fixed_eps:g})")
+        print(f"{'='*60}")
+
+        run_metrics = {
+            "win_vs_random": [], "draw_vs_random": [], "loss_vs_random": [],
+            "win_vs_minimax": [], "draw_vs_minimax": [], "loss_vs_minimax": [],
+            "win_vs_minimax_p2": [], "draw_vs_minimax_p2": [], "loss_vs_minimax_p2": [],
+            "policy_optimality": [], "q_table_size": [],
+        }
+        best_run = None
+
+        for run in range(num_runs):
+            seed = base_seed + idx * 10 + run
+            print(f"    [Run {run+1}/{num_runs}] seed={seed}")
+
+            hp = dict(
+                alpha=0.1,
+                gamma=0.9,
+                epsilon_start=fixed_eps,
+                epsilon_end=fixed_eps,
+                schedule="fixed",
+                total_episodes=total_episodes,
+                use_symmetry=True,
+            )
+            agent1 = QLearningAgent(player=1, **hp)
+            agent2 = QLearningAgent(player=2, **hp)
+
+            hist = train_selfplay(
+                agent1, agent2, total_episodes=total_episodes,
+                eval_interval=eval_interval, verbose=False, seed=seed)
+
+            summary = print_final_summary(label, agent1, verbose=False)
+            for k in run_metrics:
+                run_metrics[k].append(summary[k])
+            best_run = _maybe_update_best(
+                best_run, agent1, summary, run, seed, history=hist)
+
+            print(f"      Opt={summary['policy_optimality']:.2%}  "
+                  f"P1_D={summary['draw_vs_minimax']:.2%}  "
+                  f"P2_D={summary['draw_vs_minimax_p2']:.2%}  "
+                  f"Q={summary['q_table_size']}")
+
+        _print_run_summary(f"{label} ({num_runs} runs)", run_metrics)
+        opt_scores[label] = np.mean(run_metrics["policy_optimality"])
+        all_histories[label] = best_run["history"]
+        best_run["agent"].save(f"results/agent_selfplay_sym_{label}.pkl")
+
+        all_results[label] = {
+            "paradigm": "vs_SelfPlay",
+            "use_symmetry": True,
+            "fixed_epsilon": fixed_eps,
+            "total_episodes": total_episodes,
+            "eval_interval": eval_interval,
+            "num_runs": num_runs,
+            "seeds": [base_seed + idx * 10 + r for r in range(num_runs)],
+            "hyperparameters": {
+                "alpha": 0.1, "gamma": 0.9,
+                "epsilon_start": fixed_eps, "epsilon_end": fixed_eps,
+                "schedule": "fixed", "use_symmetry": True,
+            },
+            "best_run": _best_run_metadata(best_run),
+            "mean": {k: np.mean(v) for k, v in run_metrics.items()},
+            "std":  {k: np.std(v) for k, v in run_metrics.items()},
+            "individual": [{k: run_metrics[k][i] for k in run_metrics}
+                           for i in range(num_runs)],
+        }
+
+    try:
+        plot_training_curves(all_histories, save_dir="results",
+                             filename="exp_selfplay_symmetry_curves.png")
+        plot_policy_optimality_bar(opt_scores, save_dir="results",
+                                   filename="exp_selfplay_symmetry_optimality.png")
+    except Exception as e:
+        print(f"  [WARNING] Plot generation failed: {e}")
+
+    with open("results/exp_selfplay_symmetry_summaries.json", "w") as f:
+        json.dump(all_results, f, indent=2)
+
+    print("\n[SelfPlay+Symmetry] Done. Results -> results/exp_selfplay_symmetry_summaries.json")
+
+
+# =========================================================================== #
+#  Experiment - UCB Exploration (replaces epsilon-greedy)                      #
 # =========================================================================== #
 
 def experiment_ucb(total_episodes: int, eval_interval: int,
@@ -600,6 +718,7 @@ def experiment_ucb(total_episodes: int, eval_interval: int,
         run_metrics = {
             "win_vs_random": [], "draw_vs_random": [], "loss_vs_random": [],
             "win_vs_minimax": [], "draw_vs_minimax": [], "loss_vs_minimax": [],
+            "win_vs_minimax_p2": [], "draw_vs_minimax_p2": [], "loss_vs_minimax_p2": [],
             "policy_optimality": [], "q_table_size": [],
         }
         best_run = None
@@ -620,7 +739,8 @@ def experiment_ucb(total_episodes: int, eval_interval: int,
                 best_run, agent, summary, run, seed, history=hist)
 
             print(f"      Opt={summary['policy_optimality']:.2%}  "
-                  f"D_M={summary['draw_vs_minimax']:.2%}  "
+                  f"P1_D={summary['draw_vs_minimax']:.2%}  "
+                  f"P2_D={summary['draw_vs_minimax_p2']:.2%}  "
                   f"Q={summary['q_table_size']}")
 
         _print_run_summary(f"{label} ({num_runs} runs)", run_metrics)
@@ -687,6 +807,7 @@ def experiment_ucb(total_episodes: int, eval_interval: int,
         run_metrics = {
             "win_vs_random": [], "draw_vs_random": [], "loss_vs_random": [],
             "win_vs_minimax": [], "draw_vs_minimax": [], "loss_vs_minimax": [],
+            "win_vs_minimax_p2": [], "draw_vs_minimax_p2": [], "loss_vs_minimax_p2": [],
             "policy_optimality": [], "q_table_size": [],
         }
         best_run = None
@@ -721,7 +842,8 @@ def experiment_ucb(total_episodes: int, eval_interval: int,
                 best_run, agent, summary, run, seed, history=hist)
 
             print(f"      Opt={summary['policy_optimality']:.2%}  "
-                  f"D_M={summary['draw_vs_minimax']:.2%}  "
+                  f"P1_D={summary['draw_vs_minimax']:.2%}  "
+                  f"P2_D={summary['draw_vs_minimax_p2']:.2%}  "
                   f"Q={summary['q_table_size']}")
 
         _print_run_summary(f"{label} ({num_runs} runs)", run_metrics)
@@ -773,13 +895,17 @@ def experiment_ucb(total_episodes: int, eval_interval: int,
 
         opt = compute_policy_optimality(agent, num_states=800)
         w, d, l = evaluate_vs_minimax(agent, episodes=300)
+        w2, d2, l2 = evaluate_vs_minimax(agent, episodes=300, agent_player=2)
         summary = {
             "win_vs_minimax": w / 300,
             "draw_vs_minimax": d / 300,
             "loss_vs_minimax": l / 300,
+            "win_vs_minimax_p2": w2 / 300,
+            "draw_vs_minimax_p2": d2 / 300,
+            "loss_vs_minimax_p2": l2 / 300,
             "policy_optimality": opt,
         }
-        print(f"      Opt={opt:.2%}  W={w/300:.2%}  D={d/300:.2%}  L={l/300:.2%}")
+        print(f"      Opt={opt:.2%}  P1 D={d/300:.2%}  P2 D={d2/300:.2%}")
 
         opt_scores_ucb3[label] = opt
         all_results_ucb3[label] = {
@@ -868,8 +994,9 @@ def parse_args():
     p.add_argument("--eval-interval", type=int, default=2_000,
                    help="Evaluation checkpoint interval (default: 2000)")
     p.add_argument("--experiment", type=str,
-                   choices=["1", "2", "3", "symmetry", "ucb", "all"], default="all",
-                   help="Run specific experiment: 1, 2, 3, symmetry, ucb, or all (default: all)")
+                   choices=["1", "2", "3", "symmetry", "selfplay_symmetry", "ucb", "all"],
+                   default="all",
+                   help="Run specific experiment: 1, 2, 3, symmetry, selfplay_symmetry, ucb, or all (default: all)")
     p.add_argument("--num-runs", type=int, default=3,
                    help="Number of runs per config for statistics (default: 3)")
     p.add_argument("--seed", type=int, default=42,
@@ -919,6 +1046,8 @@ def main():
                      fixed_epsilon_grid=fixed_epsilon_grid)
     if run_all or args.experiment == "symmetry":
         experiment_symmetry(ep, iv, num_runs=nr, base_seed=200)
+    if run_all or args.experiment == "selfplay_symmetry":
+        experiment_selfplay_symmetry(ep, iv, num_runs=nr, base_seed=300)
     if run_all or args.experiment == "ucb":
         experiment_ucb(ep, iv, num_runs=nr)
 

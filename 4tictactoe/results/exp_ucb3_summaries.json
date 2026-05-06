@@ -8,9 +8,9 @@
     },
     "metrics": {
       "win_vs_minimax": 0.0,
-      "draw_vs_minimax": 0.56,
-      "loss_vs_minimax": 0.44,
-      "policy_optimality": 0.34102564102564104
+      "draw_vs_minimax": 0.6033333333333334,
+      "loss_vs_minimax": 0.39666666666666667,
+      "policy_optimality": 0.36103896103896105
     }
   },
   "ucb_c_1": {
@@ -22,9 +22,9 @@
     },
     "metrics": {
       "win_vs_minimax": 0.0,
-      "draw_vs_minimax": 0.10666666666666667,
-      "loss_vs_minimax": 0.8933333333333333,
-      "policy_optimality": 0.2904040404040404
+      "draw_vs_minimax": 0.08666666666666667,
+      "loss_vs_minimax": 0.9133333333333333,
+      "policy_optimality": 0.3404761904761905
     }
   },
   "ucb_c_2": {
@@ -36,9 +36,9 @@
     },
     "metrics": {
       "win_vs_minimax": 0.0,
-      "draw_vs_minimax": 0.16333333333333333,
-      "loss_vs_minimax": 0.8366666666666667,
-      "policy_optimality": 0.12532637075718014
+      "draw_vs_minimax": 0.17,
+      "loss_vs_minimax": 0.83,
+      "policy_optimality": 0.10052910052910052
     }
   },
   "ucb_c_5": {
@@ -50,9 +50,9 @@
     },
     "metrics": {
       "win_vs_minimax": 0.0,
-      "draw_vs_minimax": 0.21,
-      "loss_vs_minimax": 0.79,
-      "policy_optimality": 0.12594458438287154
+      "draw_vs_minimax": 0.18333333333333332,
+      "loss_vs_minimax": 0.8166666666666667,
+      "policy_optimality": 0.09743589743589744
     }
   }
 }

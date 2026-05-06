@@ -2,24 +2,180 @@
   "vs_Random + ucb": {
     "paradigm": "vs_Random",
     "c": 0.5,
-    "note": "Best-agent eval only (per-seed lost due to crash before JSON save)",
-    "best_agent_metrics": {
-      "policy_optimality": 0.369620253164557,
-      "draw_vs_minimax": 0.6666666666666666,
+    "total_episodes": 500000,
+    "eval_interval": 2000,
+    "num_runs": 3,
+    "seeds": [
+      142,
+      143,
+      144
+    ],
+    "hyperparameters": {
+      "alpha": 0.1,
+      "gamma": 0.9,
+      "c": 0.5
+    },
+    "best_run": {
+      "run_index": 0,
+      "seed": 142,
+      "selection_score": [
+        0.6466666666666666,
+        0.3409090909090909,
+        0.857,
+        -0.35333333333333333
+      ],
+      "metrics": {
+        "win_vs_random": 0.857,
+        "draw_vs_random": 0.1,
+        "loss_vs_random": 0.043,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.6466666666666666,
+        "loss_vs_minimax": 0.35333333333333333,
+        "policy_optimality": 0.3409090909090909,
+        "q_table_size": 2116088
+      }
+    },
+    "mean": {
+      "win_vs_random": 0.8603333333333333,
+      "draw_vs_random": 0.09400000000000001,
+      "loss_vs_random": 0.04566666666666666,
       "win_vs_minimax": 0.0,
-      "loss_vs_minimax": 0.3333333333333333
-    }
+      "draw_vs_minimax": 0.29444444444444445,
+      "loss_vs_minimax": 0.7055555555555556,
+      "policy_optimality": 0.2538606489567056,
+      "q_table_size": 2228369.6666666665
+    },
+    "std": {
+      "win_vs_random": 0.007717224601860157,
+      "draw_vs_random": 0.00489897948556636,
+      "loss_vs_random": 0.005249338582674541,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.2625280702216831,
+      "loss_vs_minimax": 0.2625280702216831,
+      "policy_optimality": 0.10462494488710841,
+      "q_table_size": 79408.5263446075
+    },
+    "individual": [
+      {
+        "win_vs_random": 0.857,
+        "draw_vs_random": 0.1,
+        "loss_vs_random": 0.043,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.6466666666666666,
+        "loss_vs_minimax": 0.35333333333333333,
+        "policy_optimality": 0.3409090909090909,
+        "q_table_size": 2116088
+      },
+      {
+        "win_vs_random": 0.871,
+        "draw_vs_random": 0.088,
+        "loss_vs_random": 0.041,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.22,
+        "loss_vs_minimax": 0.78,
+        "policy_optimality": 0.313953488372093,
+        "q_table_size": 2282724
+      },
+      {
+        "win_vs_random": 0.853,
+        "draw_vs_random": 0.094,
+        "loss_vs_random": 0.053,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.016666666666666666,
+        "loss_vs_minimax": 0.9833333333333333,
+        "policy_optimality": 0.1067193675889328,
+        "q_table_size": 2286297
+      }
+    ]
   },
   "vs_SelfPlay + ucb": {
     "paradigm": "vs_SelfPlay",
     "c": 0.5,
-    "note": "Best-agent eval only (per-seed lost due to crash before JSON save)",
-    "best_agent_metrics": {
-      "policy_optimality": 0.3436754176610978,
-      "draw_vs_minimax": 0.35333333333333333,
+    "total_episodes": 500000,
+    "eval_interval": 2000,
+    "num_runs": 3,
+    "seeds": [
+      442,
+      443,
+      444
+    ],
+    "hyperparameters": {
+      "alpha": 0.1,
+      "gamma": 0.9,
+      "c": 0.5
+    },
+    "best_run": {
+      "run_index": 2,
+      "seed": 444,
+      "selection_score": [
+        0.3433333333333333,
+        0.3779527559055118,
+        0.641,
+        -0.6566666666666666
+      ],
+      "metrics": {
+        "win_vs_random": 0.641,
+        "draw_vs_random": 0.24,
+        "loss_vs_random": 0.119,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.3433333333333333,
+        "loss_vs_minimax": 0.6566666666666666,
+        "policy_optimality": 0.3779527559055118,
+        "q_table_size": 2312892
+      }
+    },
+    "mean": {
+      "win_vs_random": 0.6863333333333334,
+      "draw_vs_random": 0.208,
+      "loss_vs_random": 0.10566666666666667,
       "win_vs_minimax": 0.0,
-      "loss_vs_minimax": 0.6466666666666666
-    }
+      "draw_vs_minimax": 0.2188888888888889,
+      "loss_vs_minimax": 0.7811111111111111,
+      "policy_optimality": 0.2690756906716448,
+      "q_table_size": 2312830.0
+    },
+    "std": {
+      "win_vs_random": 0.0322214559295855,
+      "draw_vs_random": 0.023790754506740633,
+      "loss_vs_random": 0.010274023338281625,
+      "win_vs_minimax": 0.0,
+      "draw_vs_minimax": 0.09700451815874288,
+      "loss_vs_minimax": 0.09700451815874289,
+      "policy_optimality": 0.1364944279856819,
+      "q_table_size": 499.17531990273716
+    },
+    "individual": [
+      {
+        "win_vs_random": 0.705,
+        "draw_vs_random": 0.201,
+        "loss_vs_random": 0.094,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.10666666666666667,
+        "loss_vs_minimax": 0.8933333333333333,
+        "policy_optimality": 0.07659574468085106,
+        "q_table_size": 2313408
+      },
+      {
+        "win_vs_random": 0.713,
+        "draw_vs_random": 0.183,
+        "loss_vs_random": 0.104,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.20666666666666667,
+        "loss_vs_minimax": 0.7933333333333333,
+        "policy_optimality": 0.35267857142857145,
+        "q_table_size": 2312190
+      },
+      {
+        "win_vs_random": 0.641,
+        "draw_vs_random": 0.24,
+        "loss_vs_random": 0.119,
+        "win_vs_minimax": 0.0,
+        "draw_vs_minimax": 0.3433333333333333,
+        "loss_vs_minimax": 0.6566666666666666,
+        "policy_optimality": 0.3779527559055118,
+        "q_table_size": 2312892
+      }
+    ]
   },
   "vs_RandomThenSelfPlay + ucb": {
     "paradigm": "vs_RandomThenSelfPlay",

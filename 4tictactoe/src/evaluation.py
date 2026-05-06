@@ -7,6 +7,7 @@ Metrics implemented
 -------------------
 1. evaluate_vs_random       – win/draw/loss rate against a random opponent
 2. evaluate_vs_minimax      – performance against depth-limited search baseline
+                              with the agent as P1 or P2
 3. compute_policy_optimality – fraction of moves matching the search baseline
 4. plot_training_curves     – visualise training histories
 """
@@ -66,6 +67,12 @@ def evaluate_vs_minimax(
     episodes: int = 200,
     agent_player: int = 1,
 ) -> Tuple[int, int, int]:
+    """
+    Play games from an empty board with the agent as X/P1 or O/P2.
+
+    ``agent_player=1`` keeps the legacy first-player metric. ``agent_player=2``
+    is the second-player check used for parity with the 3x3 experiments.
+    """
     env = TicTacToeEnv()
     minimax = MinimaxAgent(player=3 - agent_player)
 
@@ -236,18 +243,24 @@ def print_final_summary(
     verbose: bool = True,
 ) -> Dict:
     w_r, d_r, l_r = evaluate_vs_random(agent, episodes=eval_episodes)
-    w_m, d_m, l_m = evaluate_vs_minimax(agent, episodes=min(eval_episodes, 300))
+    nm = min(eval_episodes, 300)
+    w_m, d_m, l_m = evaluate_vs_minimax(agent, episodes=nm, agent_player=1)
+    w_m2, d_m2, l_m2 = evaluate_vs_minimax(agent, episodes=nm, agent_player=2)
     opt = compute_policy_optimality(agent, num_states=optimality_states)
 
     n = eval_episodes
-    nm = min(eval_episodes, 300)
 
     if verbose:
         print(f"\n{'='*60}")
         print(f"  {label}")
         print(f"{'='*60}")
         print(f"  vs Random   : W={w_r/n:.2%}  D={d_r/n:.2%}  L={l_r/n:.2%}")
-        print(f"  vs Search   : W={w_m/nm:.2%}  D={d_m/nm:.2%}  L={l_m/nm:.2%}")
+        print(
+            f"  vs Search X : W={w_m/nm:.2%}  D={d_m/nm:.2%}  L={l_m/nm:.2%}"
+        )
+        print(
+            f"  vs Search O : W={w_m2/nm:.2%}  D={d_m2/nm:.2%}  L={l_m2/nm:.2%}"
+        )
         print(f"  Policy Agr. : {opt:.2%}  (agreement with search baseline)")
         print(f"  Q-table size: {len(agent.q_table)} entries")
         print(f"{'='*60}\n")
@@ -259,6 +272,9 @@ def print_final_summary(
         "win_vs_minimax": w_m / nm,
         "draw_vs_minimax": d_m / nm,
         "loss_vs_minimax": l_m / nm,
+        "win_vs_minimax_p2": w_m2 / nm,
+        "draw_vs_minimax_p2": d_m2 / nm,
+        "loss_vs_minimax_p2": l_m2 / nm,
         "policy_optimality": opt,
         "q_table_size": len(agent.q_table),
     }
