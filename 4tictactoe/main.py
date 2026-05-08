@@ -43,6 +43,7 @@ from src.training import train_vs_random, train_selfplay
 from src.evaluation import (
     plot_training_curves,
     plot_policy_optimality_bar,
+    plot_improvements_summary,
     print_final_summary,
     evaluate_vs_random,
     evaluate_vs_minimax,
@@ -981,6 +982,33 @@ def play_vs_agent(agent_path: str = "results/agent_exp2_vs_random.pkl") -> None:
             break
 
 
+def maybe_plot_improvements_summary(results_dir: str = "results") -> None:
+    """Generate the report improvement summary once the source JSON files exist."""
+    paths = [
+        os.path.join(results_dir, "exp_symmetry_summaries.json"),
+        os.path.join(results_dir, "exp1_summaries.json"),
+        os.path.join(results_dir, "exp_ucb2_summaries.json"),
+    ]
+    if not all(os.path.exists(path) for path in paths):
+        print("[Plots] Skipped improvements summary; run Exp. 1, symmetry, and UCB first.")
+        return
+
+    with open(paths[0]) as f:
+        symmetry_results = json.load(f)
+    with open(paths[1]) as f:
+        exp1_results = json.load(f)
+    with open(paths[2]) as f:
+        ucb_results = json.load(f)
+
+    plot_improvements_summary(
+        symmetry_results,
+        exp1_results,
+        ucb_results,
+        save_dir=results_dir,
+        filename="improvements_slides.png",
+    )
+
+
 # =========================================================================== #
 #  CLI                                                                           #
 # =========================================================================== #
@@ -1050,6 +1078,8 @@ def main():
         experiment_selfplay_symmetry(ep, iv, num_runs=nr, base_seed=300)
     if run_all or args.experiment == "ucb":
         experiment_ucb(ep, iv, num_runs=nr)
+
+    maybe_plot_improvements_summary()
 
     print("\n[Done] All experiments complete. Results saved in results/")
 

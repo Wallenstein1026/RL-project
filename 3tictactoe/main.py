@@ -34,6 +34,8 @@ from src.training import (
 )
 from src.evaluation import (
     plot_training_curves,
+    plot_compact_training_curves,
+    plot_minimax_wdl_summary,
     plot_policy_optimality_bar,
     print_final_summary,
     evaluate_vs_random,
@@ -180,6 +182,7 @@ def experiment_2(
     print("=" * 70)
 
     all_histories: dict = {}
+    all_histories_by_run: dict = {}
     opt_scores: dict = {}
     all_summaries: dict = {}
 
@@ -190,6 +193,7 @@ def experiment_2(
 
     for paradigm, mode in paradigms.items():
         print(f"\n--- Paradigm: {paradigm} (linear ε) ---")
+        all_histories_by_run[paradigm] = []
 
         run_metrics = {
             "win_vs_random": [],
@@ -240,6 +244,8 @@ def experiment_2(
                 agent = agent_sp1
                 label = "Self-play"
 
+            all_histories_by_run[paradigm].append(hist)
+
             if run == num_runs - 1:
                 all_histories[paradigm] = hist
                 if mode == "train_vs_random":
@@ -265,10 +271,17 @@ def experiment_2(
         }
 
     plot_training_curves(all_histories, save_dir="results", filename="exp2_paradigms.png")
+    plot_compact_training_curves(
+        all_histories_by_run,
+        save_dir="results",
+        filename="exp2_paradigms_compact.png",
+    )
     plot_policy_optimality_bar(opt_scores, save_dir="results", filename="exp2_optimality.png")
 
     with open("results/exp2_summaries.json", "w") as f:
         json.dump(all_summaries, f, indent=2)
+    with open("results/exp2_histories.json", "w") as f:
+        json.dump(all_histories_by_run, f, indent=2)
 
     print("\n[Exp 2] Done. Figures saved to results/")
 
@@ -681,6 +694,33 @@ def play_vs_agent(agent_path: str = "results/agent_exp2_vs_random.pkl") -> None:
             break
 
 
+def maybe_plot_minimax_wdl_summary(results_dir: str = "results") -> None:
+    """Generate the report W/D/L summary if Exp. 1--3 summary files exist."""
+    paths = [
+        os.path.join(results_dir, "exp1_summaries.json"),
+        os.path.join(results_dir, "exp2_summaries.json"),
+        os.path.join(results_dir, "exp3_minimax_results.json"),
+    ]
+    if not all(os.path.exists(path) for path in paths):
+        print("[Plots] Skipped minimax W/D/L summary; run Exp. 1--3 first.")
+        return
+
+    with open(paths[0]) as f:
+        exp1 = json.load(f)
+    with open(paths[1]) as f:
+        exp2 = json.load(f)
+    with open(paths[2]) as f:
+        exp3 = json.load(f)
+
+    plot_minimax_wdl_summary(
+        exp1,
+        exp2,
+        exp3,
+        save_dir=results_dir,
+        filename="minimax_wdl_slides.png",
+    )
+
+
 def parse_args():
     p = argparse.ArgumentParser(description="Q-Learning Tic-Tac-Toe")
     p.add_argument("--episodes", type=int, default=100_000, help="Total training episodes")
@@ -692,7 +732,7 @@ def parse_args():
         default=None,
         help="Run only experiment 1–6 (default: all 1–3 legacy; use explicit list via none=all legacy)",
     )
-    p.add_argument("--num-runs", type=int, default=3, help="Runs per config")
+    p.add_argument("--num-runs", type=int, default=8, help="Runs per config")
     p.add_argument("--seed", type=int, default=42, help="Base RNG seed")
     p.add_argument(
         "--gamma",
@@ -753,6 +793,7 @@ def main():
         experiment_1(ep, iv, nr, seed, hp, use_shaping=use_shaping, alternate_first=af)
         experiment_2(ep, iv, nr, seed, hp, alternate_first=af)
         experiment_3(ep, iv, nr, seed, hp, alternate_first=af)
+        maybe_plot_minimax_wdl_summary()
         if args.include_extended:
             experiment_4_gamma_ablation(ep, iv, nr, seed, alternate_first=af)
             experiment_5_curriculum(
@@ -779,6 +820,7 @@ def main():
         experiment_2(ep, iv, nr, seed, hp, alternate_first=af)
     elif exp == 3:
         experiment_3(ep, iv, nr, seed, hp, alternate_first=af)
+        maybe_plot_minimax_wdl_summary()
     elif exp == 4:
         experiment_4_gamma_ablation(ep, iv, nr, seed, alternate_first=af)
     elif exp == 5:

@@ -16,6 +16,8 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+import matplotlib.patches as mpatches
+import matplotlib.patheffects as pe
 from typing import Dict, List, Tuple
 
 from .environment import TicTacToeEnv
@@ -233,6 +235,247 @@ def plot_policy_optimality_bar(
     plt.savefig(out_path, bbox_inches="tight", dpi=150)
     plt.close(fig)
     print(f"[Plots] Saved → {out_path}")
+
+
+def _save_png_and_pdf(fig, save_dir: str, filename: str) -> None:
+    os.makedirs(save_dir, exist_ok=True)
+    out_path = os.path.join(save_dir, filename)
+    fig.savefig(out_path, bbox_inches="tight", dpi=180)
+
+    stem, ext = os.path.splitext(filename)
+    if ext.lower() == ".png":
+        pdf_path = os.path.join(save_dir, f"{stem}.pdf")
+        fig.savefig(pdf_path, bbox_inches="tight")
+        print(f"[Plots] Saved → {pdf_path}")
+
+    print(f"[Plots] Saved → {out_path}")
+
+
+def plot_compact_training_curves(
+    histories: Dict[str, List[Dict]],
+    save_dir: str = "results",
+    filename: str = "exp2_paradigms_compact.png",
+) -> None:
+    """Plot the report-friendly 1x3 Exp. 2 curve summary over all seeds."""
+    if not histories:
+        return
+
+    panels = [
+        ("Win Rate vs Random", "win_rate_vs_random", "Win Rate", (0.60, 1.02)),
+        ("Draw Rate vs Random", "draw_rate_vs_random", "Draw Rate", (-0.002, 0.085)),
+        ("TD Error (|δ|)", "td_error", "|TD Error|", (0.035, 0.32)),
+    ]
+    colors = {
+        "vs Random": "#1f77b4",
+        "Self-play": "#17becf",
+    }
+
+    fig, axes = plt.subplots(
+        1,
+        3,
+        figsize=(13.5, 4.2),
+        sharex=True,
+        gridspec_kw=dict(left=0.06, right=0.985, bottom=0.18, top=0.78, wspace=0.28),
+    )
+    fig.patch.set_facecolor("white")
+
+    for ax, (title, key, ylabel, ylim) in zip(axes, panels):
+        for label, runs in histories.items():
+            valid_runs = [h for h in runs if key in h and h[key]]
+            if not valid_runs:
+                continue
+
+            episodes = np.array(valid_runs[0]["episode"], dtype=float)
+            vals = np.array([h[key] for h in valid_runs], dtype=float)
+            mean = vals.mean(axis=0)
+            std = vals.std(axis=0)
+            color = colors.get(label, None)
+
+            ax.plot(episodes, mean, label=label, color=color, linewidth=2.3)
+            ax.fill_between(
+                episodes,
+                mean - std,
+                mean + std,
+                color=color,
+                alpha=0.14,
+                linewidth=0,
+            )
+
+        ax.set_title(title, fontsize=13, fontweight="bold", pad=8)
+        ax.set_xlabel("Episodes", fontsize=11)
+        ax.set_ylabel(ylabel, fontsize=11)
+        ax.set_ylim(*ylim)
+        ax.grid(True, alpha=0.25)
+        ax.tick_params(labelsize=9)
+        ax.legend(fontsize=9, framealpha=0.9, loc="best")
+
+    fig.suptitle("Exp 2: Training Paradigms (8 Seeds)", fontsize=16, fontweight="bold", y=0.95)
+    fig.text(
+        0.5,
+        0.865,
+        "Mean curves with ±1 std. shaded bands",
+        ha="center",
+        va="center",
+        fontsize=11,
+        color="#555555",
+    )
+
+    _save_png_and_pdf(fig, save_dir, filename)
+    plt.close(fig)
+
+
+def plot_minimax_wdl_summary(
+    exp1: Dict,
+    exp2: Dict,
+    exp3: Dict,
+    save_dir: str = "results",
+    filename: str = "minimax_wdl_slides.png",
+) -> None:
+    """Plot a compact win/draw/loss summary against minimax for Exp. 1--3."""
+    colors = {
+        "win": "#4CAF50",
+        "draw": "#5B9BD5",
+        "loss": "#E74C3C",
+        "bg": "#FAFAFA",
+        "grid": "#E0E0E0",
+    }
+    alpha = 0.92
+    bar_w = 0.35
+    pair_gap = 0.08
+    group_gap = 0.45
+    pad = 0.30
+
+    def wdl(data: Dict, key: str) -> Tuple[np.ndarray, np.ndarray]:
+        m = data[key]["mean"]
+        p1 = np.array([m["win_vs_minimax"], m["draw_vs_minimax"], m["loss_vs_minimax"]])
+        p2 = np.array([m["win_vs_minimax_p2"], m["draw_vs_minimax_p2"], m["loss_vs_minimax_p2"]])
+        return p1, p2
+
+    panels = [
+        (
+            [wdl(exp1, k) for k in ["ε-fixed", "ε-linear", "ε-exponential"]],
+            ["Fixed ε", "Linear ε", "Exp ε"],
+            "Exp 1 – Exploration Schedule\n(trained vs Random)",
+        ),
+        (
+            [wdl(exp2, k) for k in ["vs Random", "Self-play"]],
+            ["vs Random", "Self-Play"],
+            "Exp 2 – Training Paradigm\n(linear ε)",
+        ),
+        (
+            [wdl(exp3, k) for k in list(exp3.keys())],
+            ["Fixed ε", "Linear ε", "Exp ε"],
+            "Exp 3 – Schedule × Minimax Eval\n(trained vs Random)",
+        ),
+    ]
+
+    def draw_stacked_bars(ax, wdl_list, bar_labels, title):
+        group_span = bar_w + pair_gap + bar_w
+        step = group_span + group_gap
+        centres = [i * step for i in range(len(wdl_list))]
+        pos_p1 = [c - pair_gap / 2 - bar_w for c in centres]
+        pos_p2 = [c + pair_gap / 2 for c in centres]
+
+        for i, (p1, p2) in enumerate(wdl_list):
+            for pos, vals, hatch in [(pos_p1[i], p1, ""), (pos_p2[i], p2, "///")]:
+                bottom = 0.0
+                for val, col in zip(vals, [colors["win"], colors["draw"], colors["loss"]]):
+                    if val > 0:
+                        ax.bar(
+                            pos,
+                            val,
+                            bar_w,
+                            bottom=bottom,
+                            color=col,
+                            alpha=alpha,
+                            edgecolor="white",
+                            linewidth=1.2,
+                            hatch=hatch,
+                            zorder=3,
+                        )
+                        if val >= 0.08:
+                            txt = ax.text(
+                                pos + bar_w / 2,
+                                bottom + val / 2,
+                                f"{val:.0%}",
+                                ha="center",
+                                va="center",
+                                fontsize=12,
+                                fontweight="bold",
+                                color="white",
+                                zorder=5,
+                                clip_on=False,
+                            )
+                            txt.set_path_effects([
+                                pe.Stroke(linewidth=2.8, foreground="#333"),
+                                pe.Normal(),
+                            ])
+                    bottom += val
+
+        ax.set_xticks(centres)
+        ax.set_xticklabels(bar_labels, fontsize=13, fontweight="bold")
+        for i in range(len(wdl_list)):
+            ax.text(pos_p1[i] + bar_w / 2, -0.068, "P1", ha="center", va="top", fontsize=10, color="#555")
+            ax.text(pos_p2[i] + bar_w / 2, -0.068, "P2", ha="center", va="top", fontsize=10, color="#555")
+
+        ax.set_xlim(pos_p1[0] - pad, pos_p2[-1] + bar_w + pad)
+        ax.set_ylim(0, 1.08)
+        ax.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
+        ax.set_yticklabels(["0%", "25%", "50%", "75%", "100%"], fontsize=11)
+        ax.yaxis.grid(True, color=colors["grid"], linewidth=0.8, zorder=0)
+        ax.set_axisbelow(True)
+        ax.spines[["top", "right"]].set_visible(False)
+        ax.spines[["left", "bottom"]].set_color("#BBBBBB")
+        ax.set_title(title, fontsize=14, fontweight="bold", pad=10, color="#222")
+
+    fig = plt.figure(figsize=(15, 6.2), facecolor=colors["bg"])
+    gs = gridspec.GridSpec(
+        1,
+        3,
+        figure=fig,
+        width_ratios=[3, 2, 3],
+        left=0.06,
+        right=0.97,
+        top=0.83,
+        bottom=0.20,
+        wspace=0.40,
+    )
+    axes = [fig.add_subplot(gs[i]) for i in range(3)]
+    for ax in axes:
+        ax.set_facecolor(colors["bg"])
+
+    for ax, (wdl_list, labels, title) in zip(axes, panels):
+        draw_stacked_bars(ax, wdl_list, labels, title)
+    axes[0].set_ylabel("Rate vs Minimax", fontsize=13, color="#333")
+
+    fig.legend(
+        handles=[
+            mpatches.Patch(color=colors["win"], alpha=alpha, label="Win"),
+            mpatches.Patch(color=colors["draw"], alpha=alpha, label="Draw"),
+            mpatches.Patch(color=colors["loss"], alpha=alpha, label="Loss"),
+            mpatches.Patch(facecolor="#777", alpha=0.55, label="Player 1 (solid)"),
+            mpatches.Patch(facecolor="#777", alpha=0.55, hatch="///", edgecolor="white", label="Player 2 (hatched)"),
+        ],
+        loc="lower center",
+        ncol=5,
+        fontsize=12,
+        framealpha=0.9,
+        edgecolor="#CCC",
+        bbox_to_anchor=(0.5, 0.01),
+        handlelength=1.8,
+        handletextpad=0.5,
+        columnspacing=1.5,
+    )
+    fig.suptitle(
+        "Q-Learning vs Minimax  –  Win / Draw / Loss  (3×3 Tic-Tac-Toe)",
+        fontsize=17,
+        fontweight="bold",
+        color="#1A1A2E",
+        y=0.985,
+    )
+
+    _save_png_and_pdf(fig, save_dir, filename)
+    plt.close(fig)
 
 
 def print_final_summary(
